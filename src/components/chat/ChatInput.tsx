@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Mic, MicOff, Send } from 'lucide-react';
 
-interface ChatInputProps {
+export interface ChatInputProps {
   onSendMessage: (message: string) => void;
   disabled?: boolean;
 }
@@ -12,7 +12,7 @@ export const ChatInput: React.FC<ChatInputProps> = ({ onSendMessage, disabled })
   const [selectedLang, setSelectedLang] = useState<string>('en-US');
   const recognitionRef = useRef<any>(null);
 
-  // Initialize Web Speech API from legacy index.html logic
+  // Web Speech API initialization
   useEffect(() => {
     const SpeechRecognition =
       (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
