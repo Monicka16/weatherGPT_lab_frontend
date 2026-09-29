@@ -5,16 +5,19 @@ const API_BASE_URL =
 
 export async function sendMessage(conversationId: string, message: string): Promise<string> {
   try {
-    const response = await fetch(`${API_BASE_URL}/chat`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        conversation_id: conversationId,
-        message: message,
-      }),
-    });
+    const rawUrl = import.meta.env.VITE_BACKEND_URL || "https://weathergptbackend-six.vercel.app";
+const BASE_URL = rawUrl.replace(/\/+$/, "");
+
+const response = await fetch(`${BASE_URL}/chat`, {
+  method: "POST",
+  headers: {
+    "Content-Type": "application/json",
+  },
+  body: JSON.stringify({
+    conversation_id: conversationId,
+    message: message,
+  }),
+});
 
     if (!response.ok) {
       throw new Error(`Server returned HTTP ${response.status}`);
