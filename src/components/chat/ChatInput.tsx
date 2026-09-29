@@ -73,21 +73,20 @@ export const ChatInput: React.FC<ChatInputProps> = ({ onSendMessage, disabled })
   };
 
   return (
-    <div className="flex flex-col gap-2 p-3 bg-slate-900 border-t border-slate-800">
-      <div className="flex justify-between items-center px-1">
+    <div className="w-full flex flex-col gap-1">
+      {/* Voice Language Selector */}
+      <div className="flex justify-between items-center px-2">
         <span className="text-[10px] text-slate-400 font-medium tracking-wider">
-          {isListening ? (
-            <span className="text-red-400 animate-pulse flex items-center gap-1">
-              <span className="w-2 h-2 rounded-full bg-red-500"></span> Listening...
+          {isListening && (
+            <span className="text-red-500 animate-pulse flex items-center gap-1">
+              <span className="w-1.5 h-1.5 rounded-full bg-red-500"></span> Listening...
             </span>
-          ) : (
-            'VOICE INPUT'
           )}
         </span>
         <select
           value={selectedLang}
           onChange={(e) => setSelectedLang(e.target.value)}
-          className="text-xs bg-slate-800 text-slate-300 border border-slate-700 rounded px-2 py-0.5 outline-none cursor-pointer"
+          className="text-[11px] bg-transparent text-slate-500 outline-none cursor-pointer hover:text-slate-700"
         >
           <option value="en-US">English (US)</option>
           <option value="hi-IN">Hindi (हिन्दी)</option>
@@ -97,36 +96,42 @@ export const ChatInput: React.FC<ChatInputProps> = ({ onSendMessage, disabled })
         </select>
       </div>
 
-      <form onSubmit={handleSubmit} className="flex items-center gap-2">
+      {/* Pill Input Container matching Image 2 */}
+      <form
+        onSubmit={handleSubmit}
+        className="flex items-center gap-2 bg-white border border-slate-300 rounded-2xl px-4 py-2 shadow-sm focus-within:border-slate-400 transition-colors"
+      >
         <input
           type="text"
           value={input}
           onChange={(e) => setInput(e.target.value)}
-          placeholder="Type or speak your weather query..."
+          placeholder="Ask WeatherGPT anything..."
           disabled={disabled}
-          className="flex-1 bg-slate-800 text-slate-100 placeholder-slate-400 border border-slate-700 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-emerald-500"
+          className="flex-1 bg-transparent text-slate-700 placeholder-slate-400 border-none outline-none text-sm py-1.5"
         />
 
+        {/* Mic Button */}
         <button
           type="button"
           onClick={toggleListening}
           disabled={disabled}
-          className={`p-2.5 rounded-xl border transition-all ${
+          className={`p-2 rounded-full transition-colors ${
             isListening
-              ? 'bg-red-500 text-white border-red-600 animate-pulse'
-              : 'bg-slate-800 text-slate-300 border-slate-700 hover:bg-slate-700'
+              ? 'text-red-500 animate-pulse bg-red-50'
+              : 'text-slate-500 hover:text-slate-700 hover:bg-slate-100'
           }`}
-          title="Toggle Speech Recognition"
+          title="Toggle Voice Input"
         >
           {isListening ? <MicOff className="w-5 h-5" /> : <Mic className="w-5 h-5" />}
         </button>
 
+        {/* Send Button */}
         <button
           type="submit"
           disabled={disabled || !input.trim()}
-          className="p-2.5 bg-emerald-600 hover:bg-emerald-500 disabled:opacity-50 text-white rounded-xl transition-colors"
+          className="p-2.5 bg-[#436756] hover:bg-[#385547] disabled:opacity-40 text-white rounded-full transition-colors"
         >
-          <Send className="w-5 h-5" />
+          <Send className="w-4 h-4 ml-0.5" />
         </button>
       </form>
     </div>
