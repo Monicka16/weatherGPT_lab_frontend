@@ -1,7 +1,7 @@
 import { ChatResponse } from '../types/chat';
 
 const API_BASE_URL =
-  import.meta.env.VITE_API_BASE_URL || 'https://weather-gpt-lovat-gamma.vercel.app';
+  import.meta.env.VITE_API_BASE_URL || 'https://weathergptbackend-six.vercel.app/';
 
 export async function sendMessage(conversationId: string, message: string): Promise<string> {
   try {
