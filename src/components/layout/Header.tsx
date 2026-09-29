@@ -1,9 +1,13 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { User, LogIn, UserPlus, LogOut } from 'lucide-react';
+import { User, LogIn, UserPlus, LogOut, Menu } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 
-export const Header: React.FC = () => {
+interface HeaderProps {
+  onOpenMobileSidebar?: () => void;
+}
+
+export const Header: React.FC<HeaderProps> = ({ onOpenMobileSidebar }) => {
   const { user, signOut } = useAuth();
   const navigate = useNavigate();
   const [dropdownOpen, setDropdownOpen] = useState(false);
@@ -28,13 +32,24 @@ export const Header: React.FC = () => {
 
   return (
     <header className="flex justify-between items-center px-8 py-5 bg-transparent">
-      {/* Engine Status Indicator matching Image 1 */}
-      <div className="flex items-center gap-2 text-xs font-mono text-slate-500 uppercase tracking-wider">
-        <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-        FastAPI Engine Active
+      {/* Engine Status & Mobile Menu Toggle */}
+      <div className="flex items-center gap-3">
+        {onOpenMobileSidebar && (
+          <button
+            onClick={onOpenMobileSidebar}
+            className="md:hidden p-2 text-slate-600 hover:text-slate-900 rounded-lg"
+            title="Open Menu"
+          >
+            <Menu className="w-5 h-5" />
+          </button>
+        )}
+        <div className="flex items-center gap-2 text-xs font-mono text-slate-500 uppercase tracking-wider">
+          <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+          FASTAPI ENGINE ACTIVE
+        </div>
       </div>
 
-      {/* Profile Avatar Button & Submenu (Right) */}
+      {/* Profile Avatar Button & Submenu */}
       <div className="relative" ref={dropdownRef}>
         <button
           onClick={() => setDropdownOpen((prev) => !prev)}
@@ -60,7 +75,7 @@ export const Header: React.FC = () => {
                 </div>
                 <button
                   onClick={handleSignOut}
-                  className="w-full text-left px-4 py-2.5 text-sm hover:bg-slate-50 flex items-center gap-2 text-red-600 transition-colors"
+                  className="w-full text-left px-4 py-2.5 text-sm hover:bg-slate-50 flex items-center gap-2 text-red-600 transition-colors cursor-pointer"
                 >
                   <LogOut className="w-4 h-4" />
                   Sign Out
@@ -78,7 +93,7 @@ export const Header: React.FC = () => {
                     navigate('/signin');
                     setDropdownOpen(false);
                   }}
-                  className="w-full text-left px-4 py-2.5 text-sm hover:bg-slate-50 flex items-center gap-2 transition-colors"
+                  className="w-full text-left px-4 py-2.5 text-sm hover:bg-slate-50 flex items-center gap-2 transition-colors cursor-pointer"
                 >
                   <LogIn className="w-4 h-4 text-slate-500" />
                   Sign In
@@ -88,7 +103,7 @@ export const Header: React.FC = () => {
                     navigate('/signup');
                     setDropdownOpen(false);
                   }}
-                  className="w-full text-left px-4 py-2.5 text-sm hover:bg-slate-50 flex items-center gap-2 transition-colors text-[#436756] font-medium"
+                  className="w-full text-left px-4 py-2.5 text-sm hover:bg-slate-50 flex items-center gap-2 transition-colors text-[#436756] font-medium cursor-pointer"
                 >
                   <UserPlus className="w-4 h-4" />
                   Create Account
