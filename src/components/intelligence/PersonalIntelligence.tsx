@@ -39,8 +39,7 @@ export const PersonalIntelligence: React.FC = () => {
   ];
 
   const handleSelect = (prompt: string) => {
-    const newId = crypto.randomUUID();
-    navigate(`/chat?id=${newId}&q=${encodeURIComponent(prompt)}`);
+    navigate(`/chat?draft=${encodeURIComponent(prompt)}`);
   };
 
   return (

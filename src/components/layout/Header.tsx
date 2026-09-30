@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { User, LogIn, UserPlus, LogOut, Menu } from 'lucide-react';
+import { User, LogIn, UserPlus, LogOut, Menu, Clock } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 
@@ -12,6 +12,18 @@ export const Header: React.FC<HeaderProps> = ({ onOpenMobileSidebar }) => {
   const navigate = useNavigate();
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
+
+  // 24-Hour Real-Time Clock State
+  const [currentTime, setCurrentTime] = useState<string>(() =>
+    new Date().toLocaleTimeString('en-GB', { hour12: false })
+  );
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setCurrentTime(new Date().toLocaleTimeString('en-GB', { hour12: false }));
+    }, 1000);
+    return () => clearInterval(timer);
+  }, []);
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -32,7 +44,7 @@ export const Header: React.FC<HeaderProps> = ({ onOpenMobileSidebar }) => {
 
   return (
     <header className="flex justify-between items-center px-8 py-5 bg-transparent">
-      {/* Engine Status & Mobile Menu Toggle */}
+      {/* 24-Hour Live Clock & Mobile Menu Toggle */}
       <div className="flex items-center gap-3">
         {onOpenMobileSidebar && (
           <button
@@ -43,9 +55,9 @@ export const Header: React.FC<HeaderProps> = ({ onOpenMobileSidebar }) => {
             <Menu className="w-5 h-5" />
           </button>
         )}
-        <div className="flex items-center gap-2 text-xs font-mono text-slate-500 uppercase tracking-wider">
-          <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-          FASTAPI ENGINE ACTIVE
+        <div className="flex items-center gap-2 text-xs font-mono text-slate-600 font-semibold tracking-wider bg-slate-200/50 px-3 py-1.5 rounded-lg border border-slate-300/40">
+          <Clock className="w-3.5 h-3.5 text-[#436756]" />
+          <span>{currentTime}</span>
         </div>
       </div>
 
@@ -53,7 +65,7 @@ export const Header: React.FC<HeaderProps> = ({ onOpenMobileSidebar }) => {
       <div className="relative" ref={dropdownRef}>
         <button
           onClick={() => setDropdownOpen((prev) => !prev)}
-          className="w-9 h-9 rounded-full bg-[#436756] hover:bg-[#355345] text-white flex items-center justify-center transition-all shadow-sm focus:outline-none"
+          className="w-9 h-9 rounded-full bg-[#436756] hover:bg-[#355345] text-white flex items-center justify-center transition-all shadow-sm focus:outline-none cursor-pointer"
           title="Profile & Account"
         >
           {user ? (

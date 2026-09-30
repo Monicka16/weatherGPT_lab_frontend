@@ -4,13 +4,24 @@ import { Mic, MicOff, Send } from 'lucide-react';
 export interface ChatInputProps {
   onSendMessage: (message: string) => void;
   disabled?: boolean;
+  initialValue?: string;
 }
 
-export const ChatInput: React.FC<ChatInputProps> = ({ onSendMessage, disabled }) => {
-  const [input, setInput] = useState('');
+export const ChatInput: React.FC<ChatInputProps> = ({
+  onSendMessage,
+  disabled,
+  initialValue = '',
+}) => {
+  const [input, setInput] = useState(initialValue);
   const [isListening, setIsListening] = useState<boolean>(false);
   const [selectedLang, setSelectedLang] = useState<string>('en-US');
   const recognitionRef = useRef<any>(null);
+
+  useEffect(() => {
+    if (initialValue) {
+      setInput(initialValue);
+    }
+  }, [initialValue]);
 
   // Web Speech API initialization
   useEffect(() => {
@@ -96,7 +107,7 @@ export const ChatInput: React.FC<ChatInputProps> = ({ onSendMessage, disabled })
         </select>
       </div>
 
-      {/* Pill Input Container matching Image 2 */}
+      {/* Pill Input Container */}
       <form
         onSubmit={handleSubmit}
         className="flex items-center gap-2 bg-white border border-slate-300 rounded-2xl px-4 py-2 shadow-sm focus-within:border-slate-400 transition-colors"

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
 import {
   LayoutDashboard,
@@ -16,6 +16,8 @@ import {
   ChevronRight,
   X,
 } from 'lucide-react';
+import { useGeolocation } from '../../hooks/useGeolocation';
+import { fetchSachetAlerts } from '../../services/sachetAlerts';
 
 interface SidebarProps {
   isCollapsed: boolean;
@@ -31,6 +33,36 @@ export const Sidebar: React.FC<SidebarProps> = ({
   setIsMobileOpen,
 }) => {
   const navigate = useNavigate();
+  const { location } = useGeolocation();
+  const [hasMaxActiveAlert, setHasMaxActiveAlert] = useState<boolean>(false);
+
+  useEffect(() => {
+    let isMounted = true;
+
+    const checkActiveAlerts = async () => {
+      const lat = location.lat ?? 12.9716;
+      const lng = location.lng ?? 77.5946;
+      const alerts = await fetchSachetAlerts(lat, lng);
+
+      if (!isMounted) return;
+
+      const maxSeverityFound = alerts.some((alert) => {
+        const isActive = alert.statusType === 'present';
+        const normSeverity = (alert.severity || '').toLowerCase().trim();
+        const isMaxSeverity = ['extreme', 'critical', 'max'].includes(normSeverity);
+
+        return isActive && isMaxSeverity;
+      });
+
+      setHasMaxActiveAlert(maxSeverityFound);
+    };
+
+    checkActiveAlerts();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [location.lat, location.lng]);
 
   const handleNewConversation = () => {
     const newId = crypto.randomUUID();
@@ -45,12 +77,13 @@ export const Sidebar: React.FC<SidebarProps> = ({
         { label: 'Dashboard', icon: LayoutDashboard, path: '/' },
         { label: 'Conversation AI', icon: MessageSquare, path: '/chat' },
         { label: 'Weather Alerts', icon: AlertTriangle, path: '/alerts' },
-        { label: 'Personal Intelligence', icon: UserCheck, path: '/intelligence' },
+        
       ],
     },
     {
       label: 'INTELLIGENCE',
       items: [
+        { label: 'Personal Intelligence', icon: UserCheck, path: '/intelligence' },
         { label: 'Smart City', icon: Building2, path: '/smart-city' },
         { label: 'Climate Analysis', icon: LineChart, path: '/climate' },
       ],
@@ -59,14 +92,17 @@ export const Sidebar: React.FC<SidebarProps> = ({
       label: 'UTILITY',
       items: [
         { label: 'Saved Conversations', icon: History, path: '/history' },
-        { label: 'Feedback', icon: MessageCircle, path: '/feedback' },
+        
       ],
     },
   ];
 
   const bottomItems = [
+    
     { label: 'Settings', icon: Settings, path: '/settings' },
+    { label: 'Feedback', icon: MessageCircle, path: '/feedback' },
     { label: 'About', icon: Info, path: '/about' },
+    
   ];
 
   const sidebarClasses = `
@@ -132,7 +168,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                     to={item.path}
                     onClick={() => setIsMobileOpen(false)}
                     className={({ isActive }) => `
-                      flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm transition-colors duration-150
+                      flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm transition-colors duration-150 relative
                       ${
                         isActive
                           ? 'bg-[#A9C0B5]/30 text-[#536B67] font-semibold border border-[#536B67]/20 shadow-sm'
@@ -142,8 +178,26 @@ export const Sidebar: React.FC<SidebarProps> = ({
                     `}
                     title={isCollapsed ? item.label : undefined}
                   >
-                    <item.icon size={18} className="shrink-0" />
-                    {(!isCollapsed || isMobileOpen) && <span className="truncate">{item.label}</span>}
+                    <div className="relative flex items-center justify-center">
+                      <item.icon size={18} className="shrink-0" />
+                      {item.path === '/alerts' && hasMaxActiveAlert && (
+                        <span className="absolute -top-1 -right-1 flex h-2 w-2">
+                          <span className="absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75 animate-ping" />
+                          <span className="relative inline-flex h-2 w-2 rounded-full bg-red-500" />
+                        </span>
+                      )}
+                    </div>
+                    {(!isCollapsed || isMobileOpen) && (
+                      <div className="flex items-center justify-between flex-1 min-w-0">
+                        <span className="truncate">{item.label}</span>
+                        {item.path === '/alerts' && hasMaxActiveAlert && (
+                          <span className="relative flex h-2 w-2 shrink-0 ml-2">
+                            <span className="absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75 animate-ping" />
+                            <span className="relative inline-flex h-2 w-2 rounded-full bg-red-500" />
+                          </span>
+                        )}
+                      </div>
+                    )}
                   </NavLink>
                 ))}
               </div>

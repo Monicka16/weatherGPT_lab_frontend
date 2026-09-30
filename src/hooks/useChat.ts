@@ -3,7 +3,21 @@ import { Message, Conversation } from '../types/chat';
 import { sendMessage } from '../services/weatherGPT';
 import { saveConversation, getSavedConversations } from '../utils/storage';
 
-export function useChat(activeConversationId?: string) {
+// Helper function to strip markdown formatting for plain text previews
+function stripMarkdown(text: string): string {
+  if (!text) return '';
+  return text
+    .replace(/#{1,6}\s?/g, '') // remove headers (###)
+    .replace(/(\*\*|__)(.*?)\1/g, '$2') // remove bold
+    .replace(/(\*|_)(.*?)\1/g, '$2') // remove italics
+    .replace(/\[([^\]]+)\]\([^\)]+\)/g, '$1') // remove links
+    .replace(/`{1,3}(.*?)`{1,3}/g, '$1') // remove inline code / code blocks
+    .replace(/^\s*[-+*]\s+/gm, '') // remove bullet points
+    .replace(/\n+/g, ' ') // replace line breaks with spaces
+    .trim();
+}
+
+export function useChat(activeConversationId?: string, userId?: string) {
   const [conversationId, setConversationId] = useState<string>(
     activeConversationId || crypto.randomUUID()
   );
@@ -14,7 +28,7 @@ export function useChat(activeConversationId?: string) {
   useEffect(() => {
     if (activeConversationId) {
       setConversationId(activeConversationId);
-      const savedList = getSavedConversations();
+      const savedList = getSavedConversations(userId);
       const existing = savedList.find((c) => c.id === activeConversationId);
       if (existing) {
         setMessages(existing.messages);
@@ -26,7 +40,7 @@ export function useChat(activeConversationId?: string) {
       setConversationId(newId);
       setMessages([]);
     }
-  }, [activeConversationId]);
+  }, [activeConversationId, userId]);
 
   const handleSendMessage = async (text: string) => {
     if (!text.trim() || isLoading) return;
@@ -62,12 +76,12 @@ export function useChat(activeConversationId?: string) {
       const conversationObj: Conversation = {
         id: conversationId,
         title: conversationTitle || 'Weather Chat',
-        lastMessage: replyText,
+        lastMessage: stripMarkdown(replyText),
         timestamp: new Date().toISOString(),
         messages: finalMessages,
       };
 
-      saveConversation(conversationObj);
+      saveConversation(conversationObj, userId);
     } catch (err: unknown) {
       const errMsg = err instanceof Error ? err.message : "Couldn't send message.";
       setError(errMsg);

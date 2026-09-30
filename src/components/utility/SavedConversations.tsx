@@ -1,24 +1,43 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { History, Search, Trash2, MessageSquare } from 'lucide-react';
 import { getSavedConversations, deleteConversation } from '../../utils/storage';
 import { Conversation } from '../../types/chat';
+import { useAuth } from '../../context/AuthContext';
+
+function stripMarkdown(text: string): string {
+  if (!text) return '';
+  return text
+    .replace(/#{1,6}\s?/g, '')
+    .replace(/(\*\*|__)(.*?)\1/g, '$2')
+    .replace(/(\*|_)(.*?)\1/g, '$2')
+    .replace(/\[([^\]]+)\]\([^\)]+\)/g, '$1')
+    .replace(/`{1,3}(.*?)`{1,3}/g, '$1')
+    .replace(/^\s*[-+*]\s+/gm, '')
+    .replace(/\n+/g, ' ')
+    .trim();
+}
 
 export const SavedConversations: React.FC = () => {
   const navigate = useNavigate();
-  const [conversations, setConversations] = useState<Conversation[]>(getSavedConversations());
+  const { user } = useAuth();
+  const [conversations, setConversations] = useState<Conversation[]>([]);
   const [search, setSearch] = useState('');
+
+  useEffect(() => {
+    setConversations(getSavedConversations(user?.id));
+  }, [user?.id]);
 
   const handleDelete = (e: React.MouseEvent, id: string) => {
     e.stopPropagation();
-    deleteConversation(id);
-    setConversations(getSavedConversations());
+    deleteConversation(id, user?.id);
+    setConversations(getSavedConversations(user?.id));
   };
 
   const filtered = conversations.filter(
     (c) =>
       c.title.toLowerCase().includes(search.toLowerCase()) ||
-      c.lastMessage.toLowerCase().includes(search.toLowerCase())
+      stripMarkdown(c.lastMessage).toLowerCase().includes(search.toLowerCase())
   );
 
   return (
@@ -59,7 +78,9 @@ export const SavedConversations: React.FC = () => {
                 <h3 className="text-sm font-semibold text-[#263532] group-hover:text-[#536B67] transition-colors truncate">
                   {c.title}
                 </h3>
-                <p className="text-xs text-[#5F6F6B] truncate">{c.lastMessage}</p>
+                <p className="text-xs text-[#5F6F6B] truncate">
+                  {stripMarkdown(c.lastMessage)}
+                </p>
                 <span className="text-[10px] text-[#7B8985]">
                   {new Date(c.timestamp).toLocaleString()}
                 </span>

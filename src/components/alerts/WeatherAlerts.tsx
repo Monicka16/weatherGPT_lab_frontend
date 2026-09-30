@@ -34,17 +34,35 @@ export const WeatherAlerts: React.FC = () => {
 
   const filteredAlerts = alerts.filter((a) => a.statusType === activeTab);
 
-  const getSeverityBadge = (severity: SachetAlertItem['severity']) => {
-    switch (severity) {
-      case 'extreme':
-        return 'bg-rose-500/15 text-rose-700 border-rose-500/30';
-      case 'severe':
-        return 'bg-[#D6A85F]/20 text-[#263532] border-[#D6A85F]/40';
-      case 'moderate':
-        return 'bg-[#A9C0B5]/30 text-[#536B67] border-[#536B67]/30';
-      default:
-        return 'bg-[#E4ECE7] text-[#5F6F6B] border-[#536B67]/15';
+  const getSeverityCardStyles = (severity: string) => {
+    const normalized = (severity || '').toLowerCase().trim();
+
+    if (['extreme', 'critical', 'max'].includes(normalized)) {
+      return {
+        card: 'bg-red-50 border-red-200 text-red-900',
+        badge: 'bg-red-100 text-red-900 border-red-200',
+      };
     }
+
+    if (normalized === 'high' || normalized === 'severe') {
+      return {
+        card: 'bg-orange-50 border-orange-200 text-orange-900',
+        badge: 'bg-orange-100 text-orange-900 border-orange-200',
+      };
+    }
+
+    if (normalized === 'moderate' || normalized === 'medium') {
+      return {
+        card: 'bg-yellow-50 border-yellow-200 text-yellow-900',
+        badge: 'bg-yellow-100 text-yellow-900 border-yellow-200',
+      };
+    }
+
+    // Minor / Info / Default
+    return {
+      card: 'bg-blue-50 border-blue-200 text-blue-900',
+      badge: 'bg-blue-100 text-blue-900 border-blue-200',
+    };
   };
 
   return (
@@ -135,44 +153,46 @@ export const WeatherAlerts: React.FC = () => {
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {filteredAlerts.map((alert) => (
-            <div
-              key={alert.id}
-              className="p-6 rounded-2xl bg-[#FFFFFF] border border-[#536B67]/15 hover:border-[#536B67]/30 transition-all flex flex-col justify-between space-y-4 shadow-sm"
-            >
-              <div className="space-y-3">
-                <div className="flex items-center justify-between gap-2">
-                  <span
-                    className={`text-[10px] font-semibold tracking-wider px-2.5 py-1 rounded-full uppercase border ${getSeverityBadge(
-                      alert.severity
-                    )}`}
-                  >
-                    {alert.severity} Severity
-                  </span>
-                  <span className="text-[11px] text-[#7B8985] font-mono">{alert.category}</span>
+          {filteredAlerts.map((alert) => {
+            const styles = getSeverityCardStyles(alert.severity);
+
+            return (
+              <div
+                key={alert.id}
+                className={`p-6 rounded-2xl border transition-all flex flex-col justify-between space-y-4 shadow-sm ${styles.card}`}
+              >
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between gap-2">
+                    <span
+                      className={`text-[10px] font-semibold tracking-wider px-2.5 py-1 rounded-full uppercase border ${styles.badge}`}
+                    >
+                      {alert.severity} Severity
+                    </span>
+                    <span className="text-[11px] font-mono opacity-80">{alert.category}</span>
+                  </div>
+
+                  <h3 className="text-base font-semibold">{alert.title}</h3>
+                  <p className="text-xs leading-relaxed opacity-90">{alert.description}</p>
                 </div>
 
-                <h3 className="text-base font-semibold text-[#263532]">{alert.title}</h3>
-                <p className="text-xs text-[#5F6F6B] leading-relaxed">{alert.description}</p>
+                <div className="pt-4 border-t border-current/10 space-y-2 text-[11px] opacity-80">
+                  <div className="flex items-center justify-between">
+                    <span className="flex items-center gap-1">
+                      <MapPin size={12} /> {alert.areaName}
+                    </span>
+                    <span className="flex items-center gap-1">
+                      <Layers size={12} /> Source: {alert.source}
+                    </span>
+                  </div>
+
+                  <div className="flex items-center justify-between pt-1">
+                    <span>Effective: {new Date(alert.effectiveTime).toLocaleDateString()}</span>
+                    <span>Expires: {new Date(alert.expiresTime).toLocaleDateString()}</span>
+                  </div>
+                </div>
               </div>
-
-              <div className="pt-4 border-t border-[#536B67]/10 space-y-2 text-[11px] text-[#7B8985]">
-                <div className="flex items-center justify-between">
-                  <span className="flex items-center gap-1">
-                    <MapPin size={12} /> {alert.areaName}
-                  </span>
-                  <span className="flex items-center gap-1">
-                    <Layers size={12} /> Source: {alert.source}
-                  </span>
-                </div>
-
-                <div className="flex items-center justify-between text-[#5F6F6B] pt-1">
-                  <span>Effective: {new Date(alert.effectiveTime).toLocaleDateString()}</span>
-                  <span>Expires: {new Date(alert.expiresTime).toLocaleDateString()}</span>
-                </div>
-              </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       )}
 
