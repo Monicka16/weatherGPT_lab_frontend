@@ -30,7 +30,6 @@ export const ConversationAI: React.FC = () => {
         {/* Permanent Welcome Message */}
         <ChatMessage
           message={{
-            id: 'welcome-msg',
             role: 'assistant',
             content:
               "Hi! I'm WeatherGPT. Ask me about the weather or what activities you can do today!",
