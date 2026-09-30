@@ -21,7 +21,7 @@ interface AuthContextType {
   profile: UserProfile | null;
   loading: boolean;
   refreshProfile: () => Promise<void>;
-  signUp: (credentials: SignUpWithPasswordCredentials) => Promise<any>;
+  signUp: (...args: any[]) => Promise<any>;
   signOut: () => Promise<void>;
 }
 
@@ -86,8 +86,16 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     };
   }, []);
 
-  const signUp = async (credentials: SignUpWithPasswordCredentials) => {
-    return await supabase.auth.signUp(credentials);
+  const signUp = async (...args: any[]) => {
+    if (args.length === 1 && typeof args[0] === 'object') {
+      return await supabase.auth.signUp(args[0] as SignUpWithPasswordCredentials);
+    }
+    const [email, password, options] = args;
+    return await supabase.auth.signUp({
+      email,
+      password,
+      options: typeof options === 'object' ? options : { data: options },
+    });
   };
 
   const signOut = async () => {
