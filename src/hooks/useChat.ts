@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { Message, Conversation } from '../types/chat';
 import { sendMessage } from '../services/weatherGPT';
 import { saveConversation, getSavedConversations } from '../utils/storage';
+import { useGeolocation } from './useGeolocation';
 
 // Helper function to strip markdown formatting for plain text previews
 function stripMarkdown(text: string): string {
@@ -18,6 +19,7 @@ function stripMarkdown(text: string): string {
 }
 
 export function useChat(activeConversationId?: string, userId?: string) {
+  const { location } = useGeolocation();
   const [conversationId, setConversationId] = useState<string>(
     activeConversationId || crypto.randomUUID()
   );
@@ -58,7 +60,13 @@ export function useChat(activeConversationId?: string, userId?: string) {
     setIsLoading(true);
 
     try {
-      const replyText = await sendMessage(conversationId, text.trim());
+      const locationPayload = {
+        lat: location.lat,
+        lng: location.lng,
+        cityName: location.cityName,
+      };
+
+      const replyText = await sendMessage(conversationId, text.trim(), locationPayload);
 
       const assistantMsg: Message = {
         id: crypto.randomUUID(),
