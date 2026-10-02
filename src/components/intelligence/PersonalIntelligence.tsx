@@ -43,14 +43,18 @@ export const PersonalIntelligence: React.FC = () => {
   };
 
   return (
-    <div className="space-y-8 max-w-5xl mx-auto py-4">
+    <div className="space-y-8 max-w-5xl mx-auto py-4 text-[#263532] dark:text-[#E8EFEC] transition-colors duration-300">
       <div className="space-y-2">
-        <div className="inline-flex items-center gap-2 text-[#536B67] text-xs font-semibold tracking-wider uppercase">
+        <div className="inline-flex items-center gap-2 text-[#536B67] dark:text-[#A9C0B5] text-xs font-semibold tracking-wider uppercase">
           <UserCheck size={16} />
           <span>CONTEXTUAL ADAPTATION</span>
         </div>
-        <h1 className="text-3xl font-bold text-[#263532]">Weather that matters to you.</h1>
-        <p className="text-sm text-[#5F6F6B]">
+
+        <h1 className="text-3xl font-bold text-[#263532] dark:text-[#E8EFEC]">
+          Weather that matters to you.
+        </h1>
+
+        <p className="text-sm text-[#5F6F6B] dark:text-[#8FA19A]">
           WeatherLY adapts raw meteorological data into actionable advice suited to your role.
         </p>
       </div>
@@ -60,16 +64,20 @@ export const PersonalIntelligence: React.FC = () => {
           <div
             key={idx}
             onClick={() => handleSelect(s.prompt)}
-            className="p-6 rounded-2xl bg-[#FFFFFF] border border-[#536B67]/15 hover:border-[#536B67]/40 cursor-pointer transition-all space-y-4 group shadow-sm"
+            className="p-6 rounded-2xl bg-[#FFFFFF] dark:bg-[#1C2925] border border-[#536B67]/15 dark:border-[#A9C0B5]/10 hover:border-[#536B67]/40 dark:hover:border-[#A9C0B5]/30 cursor-pointer transition-all space-y-4 group shadow-sm dark:shadow-black/20"
           >
-            <div className="w-10 h-10 rounded-xl bg-[#E4ECE7] border border-[#536B67]/15 flex items-center justify-center text-[#536B67] group-hover:scale-110 transition-transform">
+            <div className="w-10 h-10 rounded-xl bg-[#E4ECE7] dark:bg-[#24332E] border border-[#536B67]/15 dark:border-[#A9C0B5]/10 flex items-center justify-center text-[#536B67] dark:text-[#A9C0B5] group-hover:scale-110 transition-transform">
               <s.icon size={20} />
             </div>
+
             <div>
-              <h3 className="font-semibold text-[#263532] group-hover:text-[#536B67] transition-colors">
+              <h3 className="font-semibold text-[#263532] dark:text-[#E8EFEC] group-hover:text-[#536B67] dark:group-hover:text-[#A9C0B5] transition-colors">
                 {s.title}
               </h3>
-              <p className="text-xs text-[#5F6F6B] mt-2 italic">"{s.prompt}"</p>
+
+              <p className="text-xs text-[#5F6F6B] dark:text-[#8FA19A] mt-2 italic">
+                "{s.prompt}"
+              </p>
             </div>
           </div>
         ))}

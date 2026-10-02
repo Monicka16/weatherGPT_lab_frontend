@@ -4,7 +4,7 @@ import { AuthProvider } from './context/AuthContext';
 import { ProtectedRoute } from './components/auth/ProtectedRoute';
 import { SignIn } from './pages/SignIn';
 import { SignUp } from './pages/SignUp';
-
+import { ThemeProvider } from './context/ThemeContext';
 import { AppLayout } from './components/layout/AppLayout';
 import { Dashboard } from './components/dashboard/Dashboard';
 import { ConversationAI } from './components/chat/ConversationAI';
@@ -19,7 +19,8 @@ import { About } from './components/about/About';
 
 export const App: React.FC = () => {
   return (
-    <BrowserRouter>
+    <ThemeProvider>
+     <BrowserRouter>
       <AuthProvider>
         <Routes>
           {/* Public Auth Routes */}
@@ -52,6 +53,7 @@ export const App: React.FC = () => {
         </Routes>
       </AuthProvider>
     </BrowserRouter>
+  </ThemeProvider>
   );
 };
 
