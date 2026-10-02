@@ -34,9 +34,9 @@ export function useGeolocation() {
   const requestLocation = useCallback(() => {
     if (!navigator.geolocation) {
       setLocation({
-        lat: 12.9716,
-        lng: 77.5946,
-        cityName: 'Bengaluru (Fallback)',
+        lat: null,
+        lng: null,
+        cityName: '',
         status: 'error',
         errorMessage: 'Geolocation is not supported by your browser.',
       });
@@ -61,9 +61,9 @@ export function useGeolocation() {
       (error) => {
         console.warn('Geolocation access failed:', error.message);
         setLocation({
-          lat: 12.9716,
-          lng: 77.5946,
-          cityName: 'Bengaluru (Default)',
+          lat: null,
+          lng: null,
+          cityName: '',
           status: 'denied',
           errorMessage: error.message,
         });

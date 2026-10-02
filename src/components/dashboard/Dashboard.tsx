@@ -30,13 +30,20 @@ export const Dashboard: React.FC = () => {
       return;
     }
 
-    async function loadData() {
+    //Don't fall back to Bengaluru when location access is unavailable. Instead, show a message to the user.
+
+    if (location.lat == null || location.lng == null) {
+      setLoadingWeather(false);
+      return;
+    }
+    const lat = location.lat;
+    const lng = location.lng;
+    const label = location.cityName || 'Current Location';
+
+    const loadData = async () => {
       setLoadingWeather(true);
 
-      // Use live acquired position, otherwise fallback to Bengaluru if denied
-      const lat = location.lat ?? 12.9716;
-      const lng = location.lng ?? 77.5946;
-      const label = location.cityName || 'Current Location';
+      
 
       try {
         const metrics = await fetchLiveWeather(lat, lng, label);
@@ -108,7 +115,11 @@ export const Dashboard: React.FC = () => {
           </button>
         </div>
 
-        {loadingWeather || !weather ? (
+        {location.status === 'denied' || location.status === 'error' ? (
+          <div className="h-48 rounded-2xl bg-[#FFFFFF] border border-[#536B67]/15 flex items-center justify-center text-[#7B8985] text-sm shadow-sm">
+            Allow location access to view your local weather.
+          </div>
+        ) :  loadingWeather || !weather ? (
           <div className="h-48 rounded-2xl bg-[#FFFFFF] border border-[#536B67]/15 flex items-center justify-center text-[#7B8985] text-sm shadow-sm">
             Acquiring device position and live metrics...
           </div>
