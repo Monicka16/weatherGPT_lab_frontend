@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import {
   Send,
   CloudRain,
+  Cloud,
   Sun,
   Sunset,
   Wind,
@@ -209,7 +210,7 @@ export const Dashboard: React.FC = () => {
                     className="flex flex-col items-center gap-2 min-w-[60px] py-2 px-3 rounded-xl bg-[#E4ECE7] border border-[#536B67]/10"
                   >
                     <span className="text-[11px] text-[#5F6F6B]">{h.time}</span>
-                    <CloudRain size={16} className="text-[#536B67]" />
+                    <Cloud size={16} className="text-[#536B67]" />
                     <span className="text-sm font-semibold text-[#263532]">{h.temp}°</span>
                   </div>
                 ))}
