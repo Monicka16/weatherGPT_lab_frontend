@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { User, LogIn, UserPlus, LogOut, Menu, Clock } from 'lucide-react';
+import { User, LogIn, UserPlus, LogOut, Menu, CalendarClock } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 
@@ -56,7 +56,7 @@ export const Header: React.FC<HeaderProps> = ({ onOpenMobileSidebar }) => {
           </button>
         )}
         <div className="flex items-center gap-2 text-xs font-mono text-slate-600 font-semibold tracking-wider bg-slate-200/50 px-3 py-1.5 rounded-lg border border-slate-300/40">
-          <Clock className="w-3.5 h-3.5 text-[#436756]" />
+          <CalendarClock className="w-3.5 h-3.5 text-[#436756]" />
           <span>{currentTime}</span>
         </div>
       </div>
