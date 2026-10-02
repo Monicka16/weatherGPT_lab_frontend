@@ -54,7 +54,7 @@ export const SignUp: React.FC = () => {
             W
           </div>
           <h2 className="text-2xl font-bold text-slate-800">Create an Account</h2>
-          <p className="text-xs text-slate-500 mt-1">Join WeatherGPT to get personalized insights</p>
+          <p className="text-xs text-slate-500 mt-1">Join WeatherLY to get personalized insights</p>
         </div>
 
         {error && (

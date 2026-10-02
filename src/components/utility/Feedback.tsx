@@ -27,7 +27,7 @@ export const Feedback: React.FC = () => {
           <MessageCircle size={16} />
           <span>USER INPUT</span>
         </div>
-        <h1 className="text-3xl font-bold text-[#263532]">Help improve WeatherGPT.</h1>
+        <h1 className="text-3xl font-bold text-[#263532]">Help improve WeatherLY.</h1>
       </div>
 
       {submitted ? (

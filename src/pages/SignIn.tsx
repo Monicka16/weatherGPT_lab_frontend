@@ -99,7 +99,7 @@ export const SignIn: React.FC = () => {
           </div>
           <h1 className="text-2xl font-bold text-[#263532]">Welcome back</h1>
           <p className="text-xs text-[#5F6F6B]">
-            Sign in to access your WeatherGPT intelligence platform.
+            Sign in to access your WeatherLY intelligence platform.
           </p>
         </div>
 

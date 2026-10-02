@@ -43,7 +43,7 @@ export async function sendMessage(
     const data: ChatResponse = await response.json();
     return data.reply;
   } catch (error) {
-    console.error('WeatherGPT API Error:', error);
-    throw new Error("WeatherGPT couldn't reach the weather service right now. Please try again.");
+    console.error('WeatherLY API Error:', error);
+    throw new Error("WeatherLY couldn't reach the weather service right now. Please try again.");
   }
 }

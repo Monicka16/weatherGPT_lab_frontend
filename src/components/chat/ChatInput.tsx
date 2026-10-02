@@ -116,7 +116,7 @@ export const ChatInput: React.FC<ChatInputProps> = ({
           type="text"
           value={input}
           onChange={(e) => setInput(e.target.value)}
-          placeholder="Ask WeatherGPT anything..."
+          placeholder="Ask WeatherLY anything..."
           disabled={disabled}
           className="flex-1 bg-transparent text-slate-700 placeholder-slate-400 border-none outline-none text-sm py-1.5"
         />

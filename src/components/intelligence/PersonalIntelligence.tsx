@@ -51,7 +51,7 @@ export const PersonalIntelligence: React.FC = () => {
         </div>
         <h1 className="text-3xl font-bold text-[#263532]">Weather that matters to you.</h1>
         <p className="text-sm text-[#5F6F6B]">
-          WeatherGPT adapts raw meteorological data into actionable advice suited to your role.
+          WeatherLY adapts raw meteorological data into actionable advice suited to your role.
         </p>
       </div>
 

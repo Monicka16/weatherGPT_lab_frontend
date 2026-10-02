@@ -9,16 +9,16 @@ export const About: React.FC = () => {
           <Info size={16} />
           <span>PLATFORM OVERVIEW</span>
         </div>
-        <h1 className="text-3xl font-bold text-[#263532]">About WeatherGPT</h1>
+        <h1 className="text-3xl font-bold text-[#263532]">About WeatherLY</h1>
       </div>
 
       <div className="p-6 rounded-2xl bg-[#FFFFFF] border border-[#536B67]/15 space-y-4 text-sm text-[#5F6F6B] leading-relaxed shadow-sm">
         <p>
-          WeatherGPT is a conversational weather intelligence platform designed to make complex
+          WeatherLY is a conversational weather intelligence platform designed to make complex
           meteorological information easier to understand and act upon.
         </p>
         <p>
-          By combining natural language processing with meteorological tool APIs, WeatherGPT delivers
+          By combining natural language processing with meteorological tool APIs, WeatherLY delivers
           contextualized forecasts, hazard warnings, and planning insights without requiring users to decode raw radar charts.
         </p>
       </div>

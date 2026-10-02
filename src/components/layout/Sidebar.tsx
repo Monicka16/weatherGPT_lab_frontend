@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
 import {
+  Cloud,
   LayoutDashboard,
   MessageSquare,
   AlertTriangle,
@@ -128,7 +129,10 @@ export const Sidebar: React.FC<SidebarProps> = ({
             </div>
             {(!isCollapsed || isMobileOpen) && (
               <div className="truncate">
-                <h1 className="font-semibold text-sm tracking-wide text-[#263532]">WEATHERGPT</h1>
+                <div className="flex items-center gap-1.5">
+                 <h1 className="font-semibold text-sm tracking-wide text-[#263532]">WEATHERLY</h1>
+                 <Cloud className="w-4 h-4 text-[#5F6F6B]" />
+                </div>
                 <p className="text-[10px] text-[#5F6F6B] font-mono tracking-wider">INTELLIGENCE PLATFORM</p>
               </div>
             )}

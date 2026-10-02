@@ -32,7 +32,7 @@ export const ConversationAI: React.FC = () => {
           message={{
             role: 'assistant',
             content:
-              "Hi! I'm WeatherGPT. Ask me about the weather or what activities you can do today!",
+              "Hi! I'm WeatherLY. Ask me about the weather or what activities you can do today!",
             timestamp: new Date().toLocaleTimeString([], {
               hour: '2-digit',
               minute: '2-digit',
@@ -47,7 +47,7 @@ export const ConversationAI: React.FC = () => {
         {isLoading && (
           <div className="flex items-center gap-2 text-slate-400 text-xs italic ml-2">
             <span className="w-2 h-2 rounded-full bg-emerald-500 animate-ping"></span>
-            WeatherGPT is analyzing weather conditions...
+            WeatherLY is analyzing weather conditions...
           </div>
         )}
 

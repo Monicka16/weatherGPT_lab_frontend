@@ -75,7 +75,7 @@ export const Dashboard: React.FC = () => {
               type="text"
               value={query}
               onChange={(e) => setQuery(e.target.value)}
-              placeholder="Ask WeatherGPT anything..."
+              placeholder="Ask WeatherLY anything..."
               className="w-full bg-transparent text-[#263532] placeholder-[#7B8985] text-sm md:text-base px-4 py-3 focus:outline-none"
             />
             <button
