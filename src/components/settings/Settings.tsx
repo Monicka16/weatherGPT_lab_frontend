@@ -1,7 +1,16 @@
 import React, { useState, useEffect } from 'react';
-import { Settings as SettingsIcon, User, LogOut, Check, Save, RefreshCw, AlertCircle } from 'lucide-react';
+import {
+  Settings as SettingsIcon,
+  User,
+  LogOut,
+  Check,
+  Save,
+  RefreshCw,
+  AlertCircle,
+} from 'lucide-react';
 import { useLocalStorage } from '../../hooks/useLocalStorage';
 import { useAuth } from '../../context/AuthContext';
+import { useTemperatureUnit } from '../../context/TemperatureUnitContext';
 import { supabase } from '../../lib/supabase';
 
 const ALL_INTERESTS = [
@@ -17,8 +26,13 @@ const ALL_INTERESTS = [
 
 export const Settings: React.FC = () => {
   const { user, profile, refreshProfile, signOut } = useAuth();
-  const [unit, setUnit] = useLocalStorage<'celsius' | 'fahrenheit'>('weather_unit', 'celsius');
-  const [enterToSend, setEnterToSend] = useLocalStorage<boolean>('enter_to_send', true);
+
+  const { temperatureUnit, setTemperatureUnit } = useTemperatureUnit();
+
+  const [enterToSend, setEnterToSend] = useLocalStorage<boolean>(
+    'enter_to_send',
+    true
+  );
 
   // Editable Profile States
   const [name, setName] = useState('');
@@ -95,7 +109,10 @@ export const Settings: React.FC = () => {
           <SettingsIcon size={16} />
           <span>PREFERENCES & ACCOUNT</span>
         </div>
-        <h1 className="text-3xl font-bold text-[#263532] dark:text-[#E8EFEC]">Settings</h1>
+
+        <h1 className="text-3xl font-bold text-[#263532] dark:text-[#E8EFEC]">
+          Settings
+        </h1>
       </div>
 
       {/* Account Profile Section */}
@@ -106,9 +123,15 @@ export const Settings: React.FC = () => {
               <div className="w-10 h-10 rounded-xl bg-[#536B67] dark:bg-[#536B67] text-white flex items-center justify-center font-bold">
                 <User size={20} />
               </div>
+
               <div>
-                <h2 className="text-base font-semibold text-[#263532] dark:text-[#E8EFEC]">Account Profile</h2>
-                <p className="text-xs text-[#5F6F6B] dark:text-[#8FA19A] font-mono">{user.email}</p>
+                <h2 className="text-base font-semibold text-[#263532] dark:text-[#E8EFEC]">
+                  Account Profile
+                </h2>
+
+                <p className="text-xs text-[#5F6F6B] dark:text-[#8FA19A] font-mono">
+                  {user.email}
+                </p>
               </div>
             </div>
 
@@ -138,7 +161,10 @@ export const Settings: React.FC = () => {
           <form onSubmit={handleSaveProfile} className="space-y-4">
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="space-y-1">
-                <label className="text-xs font-medium text-[#263532] dark:text-[#E8EFEC]">Full Name</label>
+                <label className="text-xs font-medium text-[#263532] dark:text-[#E8EFEC]">
+                  Full Name
+                </label>
+
                 <input
                   type="text"
                   value={name}
@@ -148,7 +174,10 @@ export const Settings: React.FC = () => {
               </div>
 
               <div className="space-y-1">
-                <label className="text-xs font-medium text-[#263532] dark:text-[#E8EFEC]">Age</label>
+                <label className="text-xs font-medium text-[#263532] dark:text-[#E8EFEC]">
+                  Age
+                </label>
+
                 <input
                   type="number"
                   value={age}
@@ -158,7 +187,10 @@ export const Settings: React.FC = () => {
               </div>
 
               <div className="space-y-1">
-                <label className="text-xs font-medium text-[#263532] dark:text-[#E8EFEC]">Occupation</label>
+                <label className="text-xs font-medium text-[#263532] dark:text-[#E8EFEC]">
+                  Occupation
+                </label>
+
                 <input
                   type="text"
                   value={occupation}
@@ -168,7 +200,10 @@ export const Settings: React.FC = () => {
               </div>
 
               <div className="space-y-1">
-                <label className="text-xs font-medium text-[#263532] dark:text-[#E8EFEC]">Gender</label>
+                <label className="text-xs font-medium text-[#263532] dark:text-[#E8EFEC]">
+                  Gender
+                </label>
+
                 <select
                   value={gender}
                   onChange={(e) => setGender(e.target.value)}
@@ -182,7 +217,10 @@ export const Settings: React.FC = () => {
               </div>
 
               <div className="space-y-1 sm:col-span-2">
-                <label className="text-xs font-medium text-[#263532] dark:text-[#E8EFEC]">Contact Number</label>
+                <label className="text-xs font-medium text-[#263532] dark:text-[#E8EFEC]">
+                  Contact Number
+                </label>
+
                 <input
                   type="text"
                   value={contactNumber}
@@ -193,10 +231,14 @@ export const Settings: React.FC = () => {
             </div>
 
             <div className="space-y-1.5 pt-1">
-              <label className="text-xs font-medium text-[#263532] dark:text-[#E8EFEC]">Interests</label>
+              <label className="text-xs font-medium text-[#263532] dark:text-[#E8EFEC]">
+                Interests
+              </label>
+
               <div className="flex flex-wrap gap-2">
                 {ALL_INTERESTS.map((item) => {
                   const selected = interests.includes(item);
+
                   return (
                     <button
                       key={item}
@@ -240,22 +282,33 @@ export const Settings: React.FC = () => {
       <div className="space-y-6 bg-[#FFFFFF] dark:bg-[#1C2925] p-6 rounded-2xl border border-[#536B67]/15 dark:border-[#A9C0B5]/10 shadow-sm dark:shadow-black/20">
         <div className="flex items-center justify-between pb-4 border-b border-[#536B67]/10 dark:border-[#A9C0B5]/10">
           <div>
-            <h2 className="text-sm font-semibold text-[#263532] dark:text-[#E8EFEC]">Temperature Unit</h2>
-            <p className="text-xs text-[#5F6F6B] dark:text-[#8FA19A]">Select primary metric display</p>
+            <h2 className="text-sm font-semibold text-[#263532] dark:text-[#E8EFEC]">
+              Temperature Unit
+            </h2>
+
+            <p className="text-xs text-[#5F6F6B] dark:text-[#8FA19A]">
+              Select primary metric display
+            </p>
           </div>
+
           <div className="flex items-center bg-[#E4ECE7] dark:bg-[#24332E] p-1 rounded-xl border border-[#536B67]/15 dark:border-[#A9C0B5]/10">
             <button
-              onClick={() => setUnit('celsius')}
+              onClick={() => setTemperatureUnit('celsius')}
               className={`px-3 py-1 text-xs rounded-lg transition-colors ${
-                unit === 'celsius' ? 'bg-[#536B67] text-white font-medium' : 'text-[#5F6F6B] dark:text-[#8FA19A]'
+                temperatureUnit === 'celsius'
+                  ? 'bg-[#536B67] text-white font-medium'
+                  : 'text-[#5F6F6B] dark:text-[#8FA19A]'
               }`}
             >
               °C
             </button>
+
             <button
-              onClick={() => setUnit('fahrenheit')}
+              onClick={() => setTemperatureUnit('fahrenheit')}
               className={`px-3 py-1 text-xs rounded-lg transition-colors ${
-                unit === 'fahrenheit' ? 'bg-[#536B67] text-white font-medium' : 'text-[#5F6F6B] dark:text-[#8FA19A]'
+                temperatureUnit === 'fahrenheit'
+                  ? 'bg-[#536B67] text-white font-medium'
+                  : 'text-[#5F6F6B] dark:text-[#8FA19A]'
               }`}
             >
               °F
@@ -265,9 +318,15 @@ export const Settings: React.FC = () => {
 
         <div className="flex items-center justify-between">
           <div>
-            <h2 className="text-sm font-semibold text-[#263532] dark:text-[#E8EFEC]">Enter Key Behaviour</h2>
-            <p className="text-xs text-[#5F6F6B] dark:text-[#8FA19A]">Press Enter to send chat messages</p>
+            <h2 className="text-sm font-semibold text-[#263532] dark:text-[#E8EFEC]">
+              Enter Key Behaviour
+            </h2>
+
+            <p className="text-xs text-[#5F6F6B] dark:text-[#8FA19A]">
+              Press Enter to send chat messages
+            </p>
           </div>
+
           <input
             type="checkbox"
             checked={enterToSend}

@@ -5,12 +5,14 @@ import { PromptCard } from '../chat/PromptCard';
 import { useGeolocation } from '../../hooks/useGeolocation';
 import { fetchLiveWeather, WeatherMetrics } from '../../services/openMeteo';
 import { fetchSachetAlerts } from '../../services/sachetAlerts';
+import { useTemperatureUnit } from '../../context/TemperatureUnitContext';
 
 type SachetAlertItem = Awaited<ReturnType<typeof fetchSachetAlerts>>[number];
 
 export const SmartCity: React.FC = () => {
   const navigate = useNavigate();
   const { location } = useGeolocation();
+  const { temperatureUnit } = useTemperatureUnit();
   const [weather, setWeather] = useState<WeatherMetrics | null>(null);
   const [alerts, setAlerts] = useState<SachetAlertItem[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
@@ -24,7 +26,7 @@ export const SmartCity: React.FC = () => {
 
       try {
         const [weatherData, alertItems] = await Promise.all([
-          fetchLiveWeather(lat, lng, location.cityName),
+          fetchLiveWeather(lat, lng, location.cityName, temperatureUnit),
           fetchSachetAlerts(lat, lng),
         ]);
 
@@ -44,7 +46,7 @@ export const SmartCity: React.FC = () => {
     return () => {
       isMounted = false;
     };
-  }, [location.lat, location.lng, location.cityName]);
+  }, [location.lat, location.lng, location.cityName, temperatureUnit]);
 
   const handlePrompt = (prompt: string) => {
     navigate(`/chat?draft=${encodeURIComponent(prompt)}`);

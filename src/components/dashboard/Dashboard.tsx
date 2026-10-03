@@ -16,7 +16,9 @@ import {
   fetchLiveWeather,
   WeatherMetrics,
   getWeatherCondition,
+  TemperatureUnit,
 } from '../../services/openMeteo';
+import { useTemperatureUnit } from '../../context/TemperatureUnitContext';
 
 export const Dashboard: React.FC = () => {
   const navigate = useNavigate();
@@ -25,6 +27,10 @@ export const Dashboard: React.FC = () => {
   const [loadingWeather, setLoadingWeather] = useState(true);
 
   const { location, requestLocation } = useGeolocation();
+  const { temperatureUnit } = useTemperatureUnit();
+  
+
+  
 
   useEffect(() => {
     // DO NOT run Open-Meteo fetch while geolocation is still pending!
@@ -48,7 +54,12 @@ export const Dashboard: React.FC = () => {
       setLoadingWeather(true);
 
       try {
-        const metrics = await fetchLiveWeather(lat, lng, label);
+        const metrics = await fetchLiveWeather(
+          lat,
+          lng,
+          label,
+          temperatureUnit
+        );
         setWeather(metrics);
       } catch (err) {
         console.error('Failed to load dashboard metrics:', err);
@@ -58,7 +69,13 @@ export const Dashboard: React.FC = () => {
     };
 
     loadData();
-  }, [location.lat, location.lng, location.cityName, location.status]);
+  }, [
+    location.lat,
+    location.lng,
+    location.cityName,
+    location.status,
+    temperatureUnit,
+  ]);
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();

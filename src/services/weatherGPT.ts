@@ -9,7 +9,8 @@ export interface LocationPayload {
 export async function sendMessage(
   conversationId: string,
   message: string,
-  location?: LocationPayload
+  location?: LocationPayload,
+  temperatureUnit: 'celsius' | 'fahrenheit' = 'celsius',
 ): Promise<string> {
   try {
     const rawUrl = import.meta.env.VITE_BACKEND_URL || "https://weathergptbackend-six.vercel.app";
@@ -27,6 +28,7 @@ export async function sendMessage(
     if (location?.cityName) {
       payload.city_name = location.cityName;
     }
+    payload.temperature_unit = temperatureUnit;
 
     const response = await fetch(`${BASE_URL}/chat`, {
       method: "POST",

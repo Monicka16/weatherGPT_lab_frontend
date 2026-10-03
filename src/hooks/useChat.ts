@@ -3,6 +3,7 @@ import { Message, Conversation } from '../types/chat';
 import { sendMessage } from '../services/weatherGPT';
 import { saveConversation, getSavedConversations } from '../utils/storage';
 import { useGeolocation } from './useGeolocation';
+import { useTemperatureUnit } from '../context/TemperatureUnitContext';
 
 // Helper function to strip markdown formatting for plain text previews
 function stripMarkdown(text: string): string {
@@ -20,6 +21,7 @@ function stripMarkdown(text: string): string {
 
 export function useChat(activeConversationId?: string, userId?: string) {
   const { location } = useGeolocation();
+  const { temperatureUnit } = useTemperatureUnit();
   const [conversationId, setConversationId] = useState<string>(
     activeConversationId || crypto.randomUUID()
   );
@@ -66,7 +68,7 @@ export function useChat(activeConversationId?: string, userId?: string) {
         cityName: location.cityName,
       };
 
-      const replyText = await sendMessage(conversationId, text.trim(), locationPayload);
+      const replyText = await sendMessage(conversationId, text.trim(), locationPayload,temperatureUnit);
 
       const assistantMsg: Message = {
         id: crypto.randomUUID(),
