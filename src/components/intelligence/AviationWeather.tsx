@@ -14,8 +14,20 @@ import {
 } from 'lucide-react';
 import { PromptCard } from '../chat/PromptCard';
 import { fetchMetar, MetarData } from '../../services/aviationWeather';
+import { useTemperatureUnit } from '../../context/TemperatureUnitContext';
 
 export const AviationWeather: React.FC = () => {
+  const { temperatureUnit } = useTemperatureUnit();
+  const displayTemperature = (temp?: number) => {
+  if (temp == null) return '--';
+
+  if (temperatureUnit === 'fahrenheit') {
+    return ((temp * 9) / 5 + 32).toFixed(1);
+  }
+
+  return temp.toFixed(1);
+ };
+  
   const navigate = useNavigate();
 
   const [airport, setAirport] = useState('');
@@ -173,7 +185,7 @@ export const AviationWeather: React.FC = () => {
               </p>
 
               <p className="text-2xl font-bold mt-1">
-                {metar.temp ?? '--'}°C
+                {displayTemperature(metar.temp)}°{temperatureUnit === 'fahrenheit' ? 'F' : 'C'}
               </p>
             </div>
 
