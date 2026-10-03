@@ -1,5 +1,6 @@
 import React from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { LocationProvider } from './hooks/useGeolocation';
 import { AuthProvider } from './context/AuthContext';
 import { ProtectedRoute } from './components/auth/ProtectedRoute';
 import { SignIn } from './pages/SignIn';
@@ -23,51 +24,78 @@ export const App: React.FC = () => {
   return (
     <ThemeProvider>
       <TemperatureUnitProvider>
-        <BrowserRouter>
-          <AuthProvider>
-            <Routes>
-              {/* Public Auth Routes */}
-              <Route path="/signin" element={<SignIn />} />
-              <Route path="/signup" element={<SignUp />} />
+        <LocationProvider>
+          <BrowserRouter>
+            <AuthProvider>
+              <Routes>
+                {/* Public Auth Routes */}
+                <Route path="/signin" element={<SignIn />} />
+                <Route path="/signup" element={<SignUp />} />
 
-              {/* Protected Application Routes */}
-              <Route
-                path="/*"
-                element={
-                  <ProtectedRoute>
-                    <AppLayout>
-                      <Routes>
-                        <Route path="/" element={<Dashboard />} />
-                        <Route path="/chat" element={<ConversationAI />} />
-                        <Route path="/alerts" element={<WeatherAlerts />} />
-                        <Route
-                          path="/intelligence"
-                          element={<PersonalIntelligence />}
-                        />
-                        <Route path="/smart-city" element={<SmartCity />} />
-                        <Route path="/aviation" element={<AviationWeather />} />
-                        <Route path="/climate" element={<ClimateAnalysis />} />
-                        <Route
-                          path="/history"
-                          element={<SavedConversations />}
-                        />
-                        <Route path="/feedback" element={<Feedback />} />
-                        <Route path="/settings" element={<Settings />} />
-                        <Route path="/about" element={<About />} />
-                        <Route
-                          path="*"
-                          element={<Navigate to="/" replace />}
-                        />
-                      </Routes>
-                    </AppLayout>
-                  </ProtectedRoute>
-                }
-              />
-            </Routes>
-          </AuthProvider>
-        </BrowserRouter>
+                {/* Protected Application Routes */}
+                <Route
+                  path="/*"
+                  element={
+                    <ProtectedRoute>
+                      <AppLayout>
+                        <Routes>
+                          <Route path="/" element={<Dashboard />} />
+                          <Route
+                            path="/chat"
+                            element={<ConversationAI />}
+                          />
+                          <Route
+                            path="/alerts"
+                            element={<WeatherAlerts />}
+                          />
+                          <Route
+                            path="/intelligence"
+                            element={<PersonalIntelligence />}
+                          />
+                          <Route
+                            path="/smart-city"
+                            element={<SmartCity />}
+                          />
+                          <Route
+                            path="/aviation"
+                            element={<AviationWeather />}
+                          />
+                          <Route
+                            path="/climate"
+                            element={<ClimateAnalysis />}
+                          />
+                          <Route
+                            path="/history"
+                            element={<SavedConversations />}
+                          />
+                          <Route
+                            path="/feedback"
+                            element={<Feedback />}
+                          />
+                          <Route
+                            path="/settings"
+                            element={<Settings />}
+                          />
+                          <Route
+                            path="/about"
+                            element={<About />}
+                          />
+                          <Route
+                            path="*"
+                            element={<Navigate to="/" replace />}
+                          />
+                        </Routes>
+                      </AppLayout>
+                    </ProtectedRoute>
+                  }
+                />
+              </Routes>
+            </AuthProvider>
+          </BrowserRouter>
+        </LocationProvider>
       </TemperatureUnitProvider>
     </ThemeProvider>
   );
 };
+
 export default App;

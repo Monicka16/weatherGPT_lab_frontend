@@ -1,30 +1,39 @@
 import { useState, useEffect } from 'react';
 import { Message, Conversation } from '../types/chat';
 import { sendMessage } from '../services/weatherGPT';
-import { saveConversation, getSavedConversations } from '../utils/storage';
+import {
+  saveConversation,
+  getSavedConversations,
+} from '../utils/storage';
 import { useGeolocation } from './useGeolocation';
 import { useTemperatureUnit } from '../context/TemperatureUnitContext';
 
 // Helper function to strip markdown formatting for plain text previews
 function stripMarkdown(text: string): string {
   if (!text) return '';
+
   return text
-    .replace(/#{1,6}\s?/g, '') // remove headers (###)
-    .replace(/(\*\*|__)(.*?)\1/g, '$2') // remove bold
-    .replace(/(\*|_)(.*?)\1/g, '$2') // remove italics
-    .replace(/\[([^\]]+)\]\([^\)]+\)/g, '$1') // remove links
-    .replace(/`{1,3}(.*?)`{1,3}/g, '$1') // remove inline code / code blocks
-    .replace(/^\s*[-+*]\s+/gm, '') // remove bullet points
-    .replace(/\n+/g, ' ') // replace line breaks with spaces
+    .replace(/#{1,6}\s?/g, '')
+    .replace(/(\*\*\*|\_\_)(.*?)\1/g, '$2')
+    .replace(/(\*\*|\_)(.*?)\1/g, '$2')
+    .replace(/\[([^\]]+)\]\([^)]+\)/g, '$1')
+    .replace(/\`{1,3}(.*?)\`{1,3}/g, '$1')
+    .replace(/^\s*[-+*]\s+/gm, '')
+    .replace(/\n+/g, ' ')
     .trim();
 }
 
-export function useChat(activeConversationId?: string, userId?: string) {
-  const { location } = useGeolocation();
+export function useChat(
+  activeConversationId?: string,
+  userId?: string
+) {
+  const { location, waitForLocation } = useGeolocation();
   const { temperatureUnit } = useTemperatureUnit();
+
   const [conversationId, setConversationId] = useState<string>(
     activeConversationId || crypto.randomUUID()
   );
+
   const [messages, setMessages] = useState<Message[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
@@ -32,8 +41,12 @@ export function useChat(activeConversationId?: string, userId?: string) {
   useEffect(() => {
     if (activeConversationId) {
       setConversationId(activeConversationId);
+
       const savedList = getSavedConversations(userId);
-      const existing = savedList.find((c) => c.id === activeConversationId);
+      const existing = savedList.find(
+        (c) => c.id === activeConversationId
+      );
+
       if (existing) {
         setMessages(existing.messages);
       } else {
@@ -50,6 +63,7 @@ export function useChat(activeConversationId?: string, userId?: string) {
     if (!text.trim() || isLoading) return;
 
     setError(null);
+
     const userMsg: Message = {
       id: crypto.randomUUID(),
       sender: 'user',
@@ -62,13 +76,27 @@ export function useChat(activeConversationId?: string, userId?: string) {
     setIsLoading(true);
 
     try {
+      /*
+       * If location is already available, use it immediately.
+       * If it is still being acquired, wait for the actual result.
+       */
+      const currentLocation =
+        location.status === 'acquired'
+          ? location
+          : await waitForLocation();
+
       const locationPayload = {
-        lat: location.lat,
-        lng: location.lng,
-        cityName: location.cityName,
+        lat: currentLocation.lat,
+        lng: currentLocation.lng,
+        cityName: currentLocation.cityName,
       };
 
-      const replyText = await sendMessage(conversationId, text.trim(), locationPayload,temperatureUnit);
+      const replyText = await sendMessage(
+        conversationId,
+        text.trim(),
+        locationPayload,
+        temperatureUnit
+      );
 
       const assistantMsg: Message = {
         id: crypto.randomUUID(),
@@ -77,11 +105,16 @@ export function useChat(activeConversationId?: string, userId?: string) {
         timestamp: new Date().toISOString(),
       };
 
-      const finalMessages = [...updatedMessages, assistantMsg];
+      const finalMessages = [
+        ...updatedMessages,
+        assistantMsg,
+      ];
+
       setMessages(finalMessages);
 
       const conversationTitle =
-        updatedMessages[0]?.text.slice(0, 32) + (updatedMessages[0]?.text.length > 32 ? '...' : '');
+        updatedMessages[0]?.text.slice(0, 32) +
+        (updatedMessages[0]?.text.length > 32 ? '...' : '');
 
       const conversationObj: Conversation = {
         id: conversationId,
@@ -93,7 +126,11 @@ export function useChat(activeConversationId?: string, userId?: string) {
 
       saveConversation(conversationObj, userId);
     } catch (err: unknown) {
-      const errMsg = err instanceof Error ? err.message : "Couldn't send message.";
+      const errMsg =
+        err instanceof Error
+          ? err.message
+          : "Couldn't send message.";
+
       setError(errMsg);
     } finally {
       setIsLoading(false);
@@ -102,9 +139,11 @@ export function useChat(activeConversationId?: string, userId?: string) {
 
   const startNewConversation = () => {
     const newId = crypto.randomUUID();
+
     setConversationId(newId);
     setMessages([]);
     setError(null);
+
     return newId;
   };
 
