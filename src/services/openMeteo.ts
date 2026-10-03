@@ -5,6 +5,7 @@ export interface WeatherMetrics {
   tempHigh: number;
   tempLow: number;
   humidity: number;
+  precipitation: number;
   windSpeed: number;
   windDirection: number;
   uvIndex: number;
@@ -106,6 +107,7 @@ export async function fetchLiveWeather(
     tempHigh: Math.round(data.daily.temperature_2m_max[0]),
     tempLow: Math.round(data.daily.temperature_2m_min[0]),
     humidity: data.current.relative_humidity_2m,
+    precipitation: data.current.precipitation,
     windSpeed: Math.round(data.current.wind_speed_10m),
     windDirection: data.current.wind_direction_10m,
     uvIndex: Math.round(data.current.uv_index),

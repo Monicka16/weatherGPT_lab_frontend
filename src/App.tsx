@@ -13,6 +13,7 @@ import { WeatherAlerts } from './components/alerts/WeatherAlerts';
 import { PersonalIntelligence } from './components/intelligence/PersonalIntelligence';
 import { SmartCity } from './components/intelligence/SmartCity';
 import { ClimateAnalysis } from './components/intelligence/ClimateAnalysis';
+import { AviationWeather } from './components/intelligence/AviationWeather';
 import { SavedConversations } from './components/utility/SavedConversations';
 import { Feedback } from './components/utility/Feedback';
 import { Settings } from './components/settings/Settings';
@@ -44,6 +45,7 @@ export const App: React.FC = () => {
                           element={<PersonalIntelligence />}
                         />
                         <Route path="/smart-city" element={<SmartCity />} />
+                        <Route path="/aviation" element={<AviationWeather />} />
                         <Route path="/climate" element={<ClimateAnalysis />} />
                         <Route
                           path="/history"

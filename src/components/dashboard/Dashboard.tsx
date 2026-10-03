@@ -7,6 +7,11 @@ import {
   Sunset,
   Wind,
   Droplets,
+  CloudRain,
+  CloudDrizzle,
+  CloudFog,
+  CloudSnow,
+  CloudLightning,
   Eye,
   MapPin,
   RefreshCw,
@@ -20,6 +25,41 @@ import {
 } from '../../services/openMeteo';
 import { useTemperatureUnit } from '../../context/TemperatureUnitContext';
 
+const getWeatherIcon = (code: number) => {
+  if (code === 0) return <Sun size={16} />;
+
+  if (code >= 1 && code <= 3) {
+    return <Cloud size={16} />;
+  }
+
+  if (code >= 45 && code <= 48) {
+    return <CloudFog size={16} />;
+  }
+
+  if (code >= 51 && code <= 55) {
+    return <CloudDrizzle size={16} />;
+  }
+
+  if (code >= 61 && code <= 65) {
+    return <CloudRain size={16} />;
+  }
+
+  if (code >= 71 && code <= 77) {
+    return <CloudSnow size={16} />;
+  }
+
+  if (code >= 80 && code <= 82) {
+    return <CloudRain size={16} />;
+  }
+
+  if (code >= 95) {
+    return <CloudLightning size={16} />;
+  }
+
+  return <Cloud size={16} />;
+};
+
+
 export const Dashboard: React.FC = () => {
   const navigate = useNavigate();
   const [query, setQuery] = useState('');
@@ -28,9 +68,6 @@ export const Dashboard: React.FC = () => {
 
   const { location, requestLocation } = useGeolocation();
   const { temperatureUnit } = useTemperatureUnit();
-  
-
-  
 
   useEffect(() => {
     // DO NOT run Open-Meteo fetch while geolocation is still pending!
@@ -227,7 +264,8 @@ export const Dashboard: React.FC = () => {
             </div>
 
             {/* Secondary Metrics */}
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-3 gap-4">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+
               {/* Humidity */}
               <div className="p-5 rounded-2xl bg-[#FFFFFF] dark:bg-[#1C2925] border border-[#536B67]/15 dark:border-[#A9C0B5]/10 flex items-center gap-4 shadow-sm dark:shadow-black/20">
                 <div className="w-10 h-10 rounded-xl bg-[#A9C0B5]/30 dark:bg-[#A9C0B5]/15 flex items-center justify-center text-[#536B67] dark:text-[#BFD3CA] shrink-0">
@@ -244,7 +282,25 @@ export const Dashboard: React.FC = () => {
                   </div>
                 </div>
               </div>
+              
+              {/*Precipitation*/}
+              <div className="p-5 rounded-2xl bg-[#FFFFFF] dark:bg-[#1C2925] border border-[#536B67]/15 dark:border-[#A9C0B5]/10 flex items-center gap-4 shadow-sm dark:shadow-black/20">
+                <div className="w-10 h-10 rounded-xl bg-[#A9C0B5]/30 dark:bg-[#A9C0B5]/15 flex items-center justify-center text-[#536B67] dark:text-[#BFD3CA] shrink-0">
+                  <CloudRain size={20} />
+                </div>
 
+                <div>
+                  <div className="text-xs text-[#7B8985] dark:text-[#8FA19A]">
+                    Precipitation
+                  </div>
+
+                  <div className="text-xl font-semibold text-[#263532] dark:text-[#E8EFEC]">
+                    {weather.precipitation.toFixed(1)} mm
+                  </div>
+                </div>
+              </div>
+              
+              
               {/* Wind */}
               <div className="p-5 rounded-2xl bg-[#FFFFFF] dark:bg-[#1C2925] border border-[#536B67]/15 dark:border-[#A9C0B5]/10 flex items-center gap-4 shadow-sm dark:shadow-black/20">
                 <div className="w-10 h-10 rounded-xl bg-[#A9C0B5]/30 dark:bg-[#A9C0B5]/15 flex items-center justify-center text-[#536B67] dark:text-[#BFD3CA] shrink-0">
@@ -296,10 +352,9 @@ export const Dashboard: React.FC = () => {
                       {h.time}
                     </span>
 
-                    <Cloud
-                      size={16}
-                      className="text-[#536B67] dark:text-[#A9C0B5]"
-                    />
+                    <div className="text-[#536B67] dark:text-[#A9C0B5]">
+                      {getWeatherIcon(h.code)}
+                    </div>
 
                     <span className="text-sm font-semibold text-[#263532] dark:text-[#E8EFEC]">
                       {h.temp}°
@@ -329,9 +384,20 @@ export const Dashboard: React.FC = () => {
                       {getWeatherCondition(d.code)}
                     </span>
 
-                    <div className="text-sm font-bold text-[#263532] dark:text-[#E8EFEC]">
-                      {d.tempMax}°{' '}
+                    <div className="text-sm text-[#263532] dark:text-[#E8EFEC]">
                       <span className="text-xs font-normal text-[#7B8985] dark:text-[#8FA19A]">
+                        Max{' '}
+                      </span>
+                      <span className="font-bold">
+                        {d.tempMax}°
+                      </span>
+
+                      {' · '}
+
+                      <span className="text-xs font-normal text-[#7B8985] dark:text-[#8FA19A]">
+                        Min{' '}
+                      </span>
+                      <span className="font-bold">
                         {d.tempMin}°
                       </span>
                     </div>

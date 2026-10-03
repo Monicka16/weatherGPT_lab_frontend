@@ -7,6 +7,7 @@ import {
   AlertTriangle,
   UserCheck,
   Building2,
+  Plane,
   LineChart,
   History,
   MessageCircle,
@@ -89,6 +90,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
       items: [
         { label: 'Personal Intelligence', icon: UserCheck, path: '/intelligence' },
         { label: 'Smart City', icon: Building2, path: '/smart-city' },
+        { label: 'Aviation Weather', icon: Plane, path: '/aviation' },
         { label: 'Climate Analysis', icon: LineChart, path: '/climate' },
       ],
     },
