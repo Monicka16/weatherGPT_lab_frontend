@@ -27,7 +27,7 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({ message }) => {
     <div className={`flex gap-3 ${isUser ? 'justify-end' : 'justify-start'} my-2`}>
       {/* Bot Icon Badge */}
       {!isUser && (
-        <div className="w-9 h-9 rounded-xl bg-[#4d6b5c] dark:bg-[#536B67] flex items-center justify-center flex-shrink-0 text-white mt-1 transition-colors">
+        <div className="w-9 h-9 rounded-xl bg-accentPrimary flex items-center justify-center flex-shrink-0 text-white mt-1 transition-colors">
           <Bot className="w-5 h-5" />
         </div>
       )}
@@ -36,8 +36,8 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({ message }) => {
         <div
           className={`rounded-2xl px-5 py-4 text-sm shadow-sm transition-colors ${
             isUser
-              ? 'bg-[#436756] text-white rounded-br-sm'
-              : 'bg-white dark:bg-[#1C2925] text-slate-800 dark:text-[#E8EFEC] border border-slate-100/80 dark:border-[#A9C0B5]/10 rounded-tl-sm dark:shadow-black/20'
+              ? 'bg-accentPrimary text-white rounded-br-sm'
+              : 'bg-bgSurface text-textPrimary border border-borderSubtle rounded-tl-sm'
           }`}
         >
           {isUser ? (
@@ -51,7 +51,7 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({ message }) => {
         </div>
 
         {message.timestamp && (
-          <span className="text-[11px] text-slate-400 dark:text-[#8FA19A] mt-1 px-1 transition-colors">
+          <span className="text-[11px] tabular-nums text-textMuted mt-1 px-1 transition-colors">
             {message.timestamp}
           </span>
         )}

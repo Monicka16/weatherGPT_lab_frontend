@@ -87,7 +87,7 @@ export const ChatInput: React.FC<ChatInputProps> = ({
     <div className="w-full flex flex-col gap-1">
       {/* Voice Language Selector */}
       <div className="flex justify-between items-center px-2">
-        <span className="text-[10px] text-[#7B8985] dark:text-[#8FA19A] font-medium tracking-wider">
+        <span className="text-[10px] text-textMuted font-medium tracking-wider">
           {isListening && (
             <span className="text-red-500 dark:text-red-400 animate-pulse flex items-center gap-1">
               <span className="w-1.5 h-1.5 rounded-full bg-red-500"></span>
@@ -99,7 +99,7 @@ export const ChatInput: React.FC<ChatInputProps> = ({
         <select
           value={selectedLang}
           onChange={(e) => setSelectedLang(e.target.value)}
-          className="text-[11px] bg-transparent text-[#5F6F6B] dark:text-[#A9C0B5] outline-none cursor-pointer hover:text-[#263532] dark:hover:text-[#E8EFEC] transition-colors"
+          className="text-[11px] bg-transparent text-textSecondary outline-none cursor-pointer hover:text-textPrimary transition-colors"
         >
           <option value="en-US">English (US)</option>
           <option value="hi-IN">Hindi (हिन्दी)</option>
@@ -112,7 +112,7 @@ export const ChatInput: React.FC<ChatInputProps> = ({
       {/* Pill Input Container */}
       <form
         onSubmit={handleSubmit}
-        className="flex items-center gap-2 bg-white dark:bg-[#1C2925] border border-slate-300 dark:border-[#A9C0B5]/20 rounded-2xl px-4 py-2 shadow-sm dark:shadow-black/20 focus-within:border-[#536B67] dark:focus-within:border-[#A9C0B5]/50 transition-colors"
+        className="flex items-center gap-2 bg-bgSurface border border-borderDefault rounded-2xl px-4 py-2 shadow-sm focus-within:border-accentPrimary transition-colors"
       >
         <input
           type="text"
@@ -120,7 +120,7 @@ export const ChatInput: React.FC<ChatInputProps> = ({
           onChange={(e) => setInput(e.target.value)}
           placeholder="Ask WeatherLY anything..."
           disabled={disabled}
-          className="flex-1 bg-transparent text-[#263532] dark:text-[#E8EFEC] placeholder-[#7B8985] dark:placeholder-[#8FA19A] border-none outline-none text-sm py-1.5"
+          className="flex-1 bg-transparent text-textPrimary placeholder-textMuted border-none outline-none text-sm py-1.5"
         />
 
         {/* Mic Button */}
@@ -131,7 +131,7 @@ export const ChatInput: React.FC<ChatInputProps> = ({
           className={`p-2 rounded-full transition-colors ${
             isListening
               ? 'text-red-500 dark:text-red-400 animate-pulse bg-red-50 dark:bg-red-950/30'
-              : 'text-[#5F6F6B] dark:text-[#A9C0B5] hover:text-[#263532] dark:hover:text-[#E8EFEC] hover:bg-slate-100 dark:hover:bg-[#A9C0B5]/10'
+              : 'text-textSecondary hover:text-textPrimary hover:bg-bgElevated'
           }`}
           title="Toggle Voice Input"
         >
@@ -146,7 +146,7 @@ export const ChatInput: React.FC<ChatInputProps> = ({
         <button
           type="submit"
           disabled={disabled || !input.trim()}
-          className="p-2.5 bg-[#436756] hover:bg-[#385547] dark:bg-[#536B67] dark:hover:bg-[#647F79] disabled:opacity-40 text-white rounded-full transition-colors"
+          className="p-2.5 bg-accentPrimary hover:opacity-90 disabled:opacity-40 text-white rounded-full transition-colors"
         >
           <Send className="w-4 h-4 ml-0.5" />
         </button>

@@ -12,6 +12,7 @@ import {
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { useTheme } from '../../context/ThemeContext';
+import { useTextScale } from '../../context/TextScaleContext';
 
 interface HeaderProps {
   onOpenMobileSidebar?: () => void;
@@ -20,6 +21,7 @@ interface HeaderProps {
 export const Header: React.FC<HeaderProps> = ({ onOpenMobileSidebar }) => {
   const { user, signOut } = useAuth();
   const { theme, toggleTheme } = useTheme();
+  const { scale, toggleScale } = useTextScale();
   const navigate = useNavigate();
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
@@ -61,31 +63,35 @@ export const Header: React.FC<HeaderProps> = ({ onOpenMobileSidebar }) => {
   };
 
   return (
-    <header className="flex justify-between items-center px-8 py-5 bg-transparent">
+    <header className="flex justify-between items-center px-6 md:px-8 py-4 bg-transparent border-b border-borderSubtle/50">
       {/* 24-Hour Live Clock & Mobile Menu Toggle */}
       <div className="flex items-center gap-3">
         {onOpenMobileSidebar && (
           <button
             onClick={onOpenMobileSidebar}
-            className="md:hidden p-2 text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white rounded-lg transition-colors"
+            className="md:hidden p-2 text-textSecondary hover:text-textPrimary rounded-lg transition-colors focus-visible:ring-1 focus-visible:ring-accentPrimary"
+            aria-label="Open menu"
             title="Open Menu"
           >
             <Menu className="w-5 h-5" />
           </button>
         )}
 
-        <div className="flex items-center gap-2 text-xs font-mono text-slate-600 dark:text-slate-300 font-semibold tracking-wider bg-slate-200/50 dark:bg-slate-700/40 px-3 py-1.5 rounded-lg border border-slate-300/40 dark:border-slate-600/40 transition-colors">
-          <CalendarClock className="w-3.5 h-3.5 text-[#436756] dark:text-[#A9C0B5]" />
+        <div className="flex items-center gap-2 text-xs tabular-nums text-textSecondary font-semibold tracking-wider bg-bgElevated px-3 py-1.5 rounded-lg border border-borderSubtle transition-colors">
+          <CalendarClock className="w-3.5 h-3.5 text-accentPrimary" />
           <span>{currentTime}</span>
         </div>
       </div>
 
-      {/* Theme Toggle & Profile */}
+      {/* Controls: Text Size, Theme Toggle & Profile */}
       <div className="flex items-center gap-2">
+        
+
         <button
           onClick={toggleTheme}
-          className="w-9 h-9 rounded-full bg-slate-200/60 dark:bg-slate-700/60 hover:bg-slate-300/70 dark:hover:bg-slate-600/70 text-slate-700 dark:text-slate-200 flex items-center justify-center transition-all"
+          className="w-9 h-9 rounded-full bg-bgElevated hover:opacity-85 text-textPrimary border border-borderSubtle flex items-center justify-center transition-all focus-visible:ring-1 focus-visible:ring-accentPrimary"
           title={theme === 'light' ? 'Switch to dark mode' : 'Switch to light mode'}
+          aria-label={theme === 'light' ? 'Switch to dark mode' : 'Switch to light mode'}
         >
           {theme === 'light' ? (
             <Moon className="w-4 h-4" />
@@ -98,7 +104,7 @@ export const Header: React.FC<HeaderProps> = ({ onOpenMobileSidebar }) => {
         <div className="relative" ref={dropdownRef}>
           <button
             onClick={() => setDropdownOpen((prev) => !prev)}
-            className="w-9 h-9 rounded-full bg-[#436756] hover:bg-[#355345] text-white flex items-center justify-center transition-all shadow-sm focus:outline-none cursor-pointer"
+            className="w-9 h-9 rounded-full bg-accentPrimary hover:opacity-90 text-white flex items-center justify-center transition-all shadow-sm focus:outline-none cursor-pointer"
             title="Profile & Account"
           >
             {user ? (
@@ -111,22 +117,22 @@ export const Header: React.FC<HeaderProps> = ({ onOpenMobileSidebar }) => {
           </button>
 
           {dropdownOpen && (
-            <div className="absolute right-0 mt-2 w-56 bg-white dark:bg-[#1C2925] border border-slate-200 dark:border-slate-700 rounded-2xl shadow-xl py-2 z-50 text-slate-700 dark:text-slate-200 transition-colors">
+            <div className="absolute right-0 mt-2 w-56 bg-bgSurface border border-borderDefault rounded-2xl shadow-xl py-2 z-50 text-textPrimary transition-colors">
               {user ? (
                 <>
-                  <div className="px-4 py-3 border-b border-slate-100 dark:border-slate-700">
-                    <p className="text-xs text-slate-400 dark:text-slate-400 font-medium">
+                  <div className="px-4 py-3 border-b border-borderSubtle">
+                    <p className="text-xs text-textMuted font-medium">
                       Signed in as
                     </p>
 
-                    <p className="text-sm font-semibold text-slate-800 dark:text-slate-100 truncate">
+                    <p className="text-sm font-semibold text-textPrimary truncate">
                       {user.email}
                     </p>
                   </div>
 
                   <button
                     onClick={handleSignOut}
-                    className="w-full text-left px-4 py-2.5 text-sm hover:bg-slate-50 dark:hover:bg-slate-700/50 flex items-center gap-2 text-red-600 dark:text-red-400 transition-colors cursor-pointer"
+                    className="w-full text-left px-4 py-2.5 text-sm hover:bg-bgElevated flex items-center gap-2 text-rose-600 dark:text-rose-400 transition-colors cursor-pointer"
                   >
                     <LogOut className="w-4 h-4" />
                     Sign Out
@@ -134,8 +140,8 @@ export const Header: React.FC<HeaderProps> = ({ onOpenMobileSidebar }) => {
                 </>
               ) : (
                 <>
-                  <div className="px-4 py-2 border-b border-slate-100 dark:border-slate-700">
-                    <p className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
+                  <div className="px-4 py-2 border-b border-borderSubtle">
+                    <p className="text-xs font-semibold text-textMuted uppercase tracking-wider">
                       Guest Account
                     </p>
                   </div>
@@ -145,9 +151,9 @@ export const Header: React.FC<HeaderProps> = ({ onOpenMobileSidebar }) => {
                       navigate('/signin');
                       setDropdownOpen(false);
                     }}
-                    className="w-full text-left px-4 py-2.5 text-sm hover:bg-slate-50 dark:hover:bg-slate-700/50 flex items-center gap-2 transition-colors cursor-pointer"
+                    className="w-full text-left px-4 py-2.5 text-sm hover:bg-bgElevated flex items-center gap-2 transition-colors cursor-pointer"
                   >
-                    <LogIn className="w-4 h-4 text-slate-500 dark:text-slate-400" />
+                    <LogIn className="w-4 h-4 text-textSecondary" />
                     Sign In
                   </button>
 
@@ -156,7 +162,7 @@ export const Header: React.FC<HeaderProps> = ({ onOpenMobileSidebar }) => {
                       navigate('/signup');
                       setDropdownOpen(false);
                     }}
-                    className="w-full text-left px-4 py-2.5 text-sm hover:bg-slate-50 dark:hover:bg-slate-700/50 flex items-center gap-2 transition-colors text-[#436756] dark:text-[#A9C0B5] font-medium cursor-pointer"
+                    className="w-full text-left px-4 py-2.5 text-sm hover:bg-bgElevated flex items-center gap-2 transition-colors text-accentPrimary font-medium cursor-pointer"
                   >
                     <UserPlus className="w-4 h-4" />
                     Create Account

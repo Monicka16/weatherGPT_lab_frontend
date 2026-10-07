@@ -102,34 +102,34 @@ export const Settings: React.FC = () => {
   };
 
   return (
-    <div className="space-y-8 max-w-2xl mx-auto py-4 text-[#263532] dark:text-[#E8EFEC] transition-colors duration-300">
+    <div className="space-y-8 max-w-2xl mx-auto py-4 text-primary transition-colors duration-200">
       {/* Header */}
       <div className="space-y-2">
-        <div className="inline-flex items-center gap-2 text-[#536B67] dark:text-[#A9C0B5] text-xs font-semibold tracking-wider uppercase">
+        <div className="inline-flex items-center gap-2 text-accent-base text-xs font-semibold tracking-wider uppercase">
           <SettingsIcon size={16} />
           <span>PREFERENCES & ACCOUNT</span>
         </div>
 
-        <h1 className="text-3xl font-bold text-[#263532] dark:text-[#E8EFEC]">
+        <h1 className="text-3xl font-light tracking-tight text-primary">
           Settings
         </h1>
       </div>
 
       {/* Account Profile Section */}
       {user && (
-        <div className="bg-[#FFFFFF] dark:bg-[#1C2925] p-6 rounded-2xl border border-[#536B67]/15 dark:border-[#A9C0B5]/10 shadow-sm dark:shadow-black/20 space-y-6">
-          <div className="flex items-center justify-between pb-4 border-b border-[#536B67]/10 dark:border-[#A9C0B5]/10">
+        <div className="bg-surface p-6 rounded-2xl border border-border shadow-sm space-y-6">
+          <div className="flex items-center justify-between pb-4 border-b border-border">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-[#536B67] dark:bg-[#536B67] text-white flex items-center justify-center font-bold">
+              <div className="w-10 h-10 rounded-xl bg-accent-base text-white flex items-center justify-center font-bold">
                 <User size={20} />
               </div>
 
               <div>
-                <h2 className="text-base font-semibold text-[#263532] dark:text-[#E8EFEC]">
+                <h2 className="text-base font-medium text-primary">
                   Account Profile
                 </h2>
 
-                <p className="text-xs text-[#5F6F6B] dark:text-[#8FA19A] font-mono">
+                <p className="text-xs text-secondary font-mono">
                   {user.email}
                 </p>
               </div>
@@ -137,7 +137,7 @@ export const Settings: React.FC = () => {
 
             <button
               onClick={signOut}
-              className="flex items-center gap-2 px-3.5 py-1.5 rounded-xl bg-rose-500/10 hover:bg-rose-500/20 text-rose-700 dark:text-rose-300 text-xs font-medium transition-colors"
+              className="flex items-center gap-2 px-3.5 py-1.5 rounded-xl bg-surface-elevated hover:bg-accent-alert/10 text-accent-alert text-xs font-medium transition-colors border border-border"
             >
               <LogOut size={14} />
               <span>Sign Out</span>
@@ -145,14 +145,14 @@ export const Settings: React.FC = () => {
           </div>
 
           {saveSuccess && (
-            <div className="p-3 rounded-xl bg-[#A9C0B5]/30 dark:bg-[#A9C0B5]/15 border border-[#536B67]/20 dark:border-[#A9C0B5]/15 text-[#536B67] dark:text-[#A9C0B5] text-xs flex items-center gap-2">
+            <div className="p-3 rounded-xl bg-surface-elevated border border-border text-accent-base text-xs flex items-center gap-2">
               <Check size={16} />
               <span>Profile updated successfully!</span>
             </div>
           )}
 
           {saveError && (
-            <div className="p-3 rounded-xl bg-rose-500/10 border border-rose-500/20 text-rose-700 dark:text-rose-300 text-xs flex items-center gap-2">
+            <div className="p-3 rounded-xl bg-surface-elevated border border-accent-alert text-accent-alert text-xs flex items-center gap-2">
               <AlertCircle size={16} />
               <span>{saveError}</span>
             </div>
@@ -161,7 +161,7 @@ export const Settings: React.FC = () => {
           <form onSubmit={handleSaveProfile} className="space-y-4">
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="space-y-1">
-                <label className="text-xs font-medium text-[#263532] dark:text-[#E8EFEC]">
+                <label className="text-xs font-medium text-primary">
                   Full Name
                 </label>
 
@@ -169,12 +169,12 @@ export const Settings: React.FC = () => {
                   type="text"
                   value={name}
                   onChange={(e) => setName(e.target.value)}
-                  className="w-full bg-[#E4ECE7] dark:bg-[#24332E] border border-[#536B67]/15 dark:border-[#A9C0B5]/10 rounded-xl px-3.5 py-2 text-sm text-[#263532] dark:text-[#E8EFEC] focus:outline-none focus:border-[#536B67] dark:focus:border-[#A9C0B5]"
+                  className="w-full bg-surface-elevated border border-border rounded-xl px-3.5 py-2 text-sm text-primary focus:outline-none focus:border-accent-base"
                 />
               </div>
 
               <div className="space-y-1">
-                <label className="text-xs font-medium text-[#263532] dark:text-[#E8EFEC]">
+                <label className="text-xs font-medium text-primary">
                   Age
                 </label>
 
@@ -182,12 +182,12 @@ export const Settings: React.FC = () => {
                   type="number"
                   value={age}
                   onChange={(e) => setAge(e.target.value)}
-                  className="w-full bg-[#E4ECE7] dark:bg-[#24332E] border border-[#536B67]/15 dark:border-[#A9C0B5]/10 rounded-xl px-3.5 py-2 text-sm text-[#263532] dark:text-[#E8EFEC] focus:outline-none focus:border-[#536B67] dark:focus:border-[#A9C0B5]"
+                  className="w-full bg-surface-elevated border border-border rounded-xl px-3.5 py-2 text-sm text-primary focus:outline-none focus:border-accent-base"
                 />
               </div>
 
               <div className="space-y-1">
-                <label className="text-xs font-medium text-[#263532] dark:text-[#E8EFEC]">
+                <label className="text-xs font-medium text-primary">
                   Occupation
                 </label>
 
@@ -195,19 +195,19 @@ export const Settings: React.FC = () => {
                   type="text"
                   value={occupation}
                   onChange={(e) => setOccupation(e.target.value)}
-                  className="w-full bg-[#E4ECE7] dark:bg-[#24332E] border border-[#536B67]/15 dark:border-[#A9C0B5]/10 rounded-xl px-3.5 py-2 text-sm text-[#263532] dark:text-[#E8EFEC] focus:outline-none focus:border-[#536B67] dark:focus:border-[#A9C0B5]"
+                  className="w-full bg-surface-elevated border border-border rounded-xl px-3.5 py-2 text-sm text-primary focus:outline-none focus:border-accent-base"
                 />
               </div>
 
               <div className="space-y-1">
-                <label className="text-xs font-medium text-[#263532] dark:text-[#E8EFEC]">
+                <label className="text-xs font-medium text-primary">
                   Gender
                 </label>
 
                 <select
                   value={gender}
                   onChange={(e) => setGender(e.target.value)}
-                  className="w-full bg-[#E4ECE7] dark:bg-[#24332E] border border-[#536B67]/15 dark:border-[#A9C0B5]/10 rounded-xl px-3.5 py-2 text-sm text-[#263532] dark:text-[#E8EFEC] focus:outline-none focus:border-[#536B67] dark:focus:border-[#A9C0B5]"
+                  className="w-full bg-surface-elevated border border-border rounded-xl px-3.5 py-2 text-sm text-primary focus:outline-none focus:border-accent-base"
                 >
                   <option value="Male">Male</option>
                   <option value="Female">Female</option>
@@ -217,7 +217,7 @@ export const Settings: React.FC = () => {
               </div>
 
               <div className="space-y-1 sm:col-span-2">
-                <label className="text-xs font-medium text-[#263532] dark:text-[#E8EFEC]">
+                <label className="text-xs font-medium text-primary">
                   Contact Number
                 </label>
 
@@ -225,13 +225,13 @@ export const Settings: React.FC = () => {
                   type="text"
                   value={contactNumber}
                   onChange={(e) => setContactNumber(e.target.value)}
-                  className="w-full bg-[#E4ECE7] dark:bg-[#24332E] border border-[#536B67]/15 dark:border-[#A9C0B5]/10 rounded-xl px-3.5 py-2 text-sm text-[#263532] dark:text-[#E8EFEC] focus:outline-none focus:border-[#536B67] dark:focus:border-[#A9C0B5]"
+                  className="w-full bg-surface-elevated border border-border rounded-xl px-3.5 py-2 text-sm text-primary focus:outline-none focus:border-accent-base"
                 />
               </div>
             </div>
 
             <div className="space-y-1.5 pt-1">
-              <label className="text-xs font-medium text-[#263532] dark:text-[#E8EFEC]">
+              <label className="text-xs font-medium text-primary">
                 Interests
               </label>
 
@@ -246,8 +246,8 @@ export const Settings: React.FC = () => {
                       onClick={() => toggleInterest(item)}
                       className={`px-3 py-1 rounded-full text-xs font-medium transition-all ${
                         selected
-                          ? 'bg-[#536B67] text-white border border-[#536B67]'
-                          : 'bg-[#E4ECE7] dark:bg-[#24332E] text-[#5F6F6B] dark:text-[#8FA19A] border border-[#536B67]/15 dark:border-[#A9C0B5]/10'
+                          ? 'bg-accent-base text-white border border-accent-base'
+                          : 'bg-surface-elevated text-secondary border border-border hover:border-accent-base/30'
                       }`}
                     >
                       {item}
@@ -260,7 +260,7 @@ export const Settings: React.FC = () => {
             <button
               type="submit"
               disabled={saving}
-              className="flex items-center gap-2 px-5 py-2.5 bg-[#536B67] hover:bg-[#435754] text-white font-medium text-xs rounded-xl transition-colors shadow-sm disabled:opacity-50"
+              className="flex items-center gap-2 px-5 py-2.5 bg-accent-base hover:opacity-90 text-white font-medium text-xs rounded-xl transition-opacity shadow-sm disabled:opacity-50"
             >
               {saving ? (
                 <>
@@ -279,25 +279,25 @@ export const Settings: React.FC = () => {
       )}
 
       {/* App Preferences */}
-      <div className="space-y-6 bg-[#FFFFFF] dark:bg-[#1C2925] p-6 rounded-2xl border border-[#536B67]/15 dark:border-[#A9C0B5]/10 shadow-sm dark:shadow-black/20">
-        <div className="flex items-center justify-between pb-4 border-b border-[#536B67]/10 dark:border-[#A9C0B5]/10">
+      <div className="space-y-6 bg-surface p-6 rounded-2xl border border-border shadow-sm">
+        <div className="flex items-center justify-between pb-4 border-b border-border">
           <div>
-            <h2 className="text-sm font-semibold text-[#263532] dark:text-[#E8EFEC]">
+            <h2 className="text-sm font-medium text-primary">
               Temperature Unit
             </h2>
 
-            <p className="text-xs text-[#5F6F6B] dark:text-[#8FA19A]">
+            <p className="text-xs text-secondary">
               Select primary metric display
             </p>
           </div>
 
-          <div className="flex items-center bg-[#E4ECE7] dark:bg-[#24332E] p-1 rounded-xl border border-[#536B67]/15 dark:border-[#A9C0B5]/10">
+          <div className="flex items-center bg-surface-elevated p-1 rounded-xl border border-border">
             <button
               onClick={() => setTemperatureUnit('celsius')}
               className={`px-3 py-1 text-xs rounded-lg transition-colors ${
                 temperatureUnit === 'celsius'
-                  ? 'bg-[#536B67] text-white font-medium'
-                  : 'text-[#5F6F6B] dark:text-[#8FA19A]'
+                  ? 'bg-accent-base text-white font-medium shadow-sm'
+                  : 'text-secondary hover:text-primary'
               }`}
             >
               °C
@@ -307,8 +307,8 @@ export const Settings: React.FC = () => {
               onClick={() => setTemperatureUnit('fahrenheit')}
               className={`px-3 py-1 text-xs rounded-lg transition-colors ${
                 temperatureUnit === 'fahrenheit'
-                  ? 'bg-[#536B67] text-white font-medium'
-                  : 'text-[#5F6F6B] dark:text-[#8FA19A]'
+                  ? 'bg-accent-base text-white font-medium shadow-sm'
+                  : 'text-secondary hover:text-primary'
               }`}
             >
               °F
@@ -318,11 +318,11 @@ export const Settings: React.FC = () => {
 
         <div className="flex items-center justify-between">
           <div>
-            <h2 className="text-sm font-semibold text-[#263532] dark:text-[#E8EFEC]">
+            <h2 className="text-sm font-medium text-primary">
               Enter Key Behaviour
             </h2>
 
-            <p className="text-xs text-[#5F6F6B] dark:text-[#8FA19A]">
+            <p className="text-xs text-secondary">
               Press Enter to send chat messages
             </p>
           </div>
@@ -331,7 +331,7 @@ export const Settings: React.FC = () => {
             type="checkbox"
             checked={enterToSend}
             onChange={(e) => setEnterToSend(e.target.checked)}
-            className="w-4 h-4 accent-[#536B67] cursor-pointer"
+            className="w-4 h-4 accent-accent-base cursor-pointer"
           />
         </div>
       </div>

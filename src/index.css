@@ -4,51 +4,68 @@
 
 @layer base {
   :root {
-    --bg-main: #F4F6F2;
-    --bg-sidebar: #EBF0E9;
-    --bg-surface: #FFFFFF;
-    --bg-elevated: #E4ECE7;
-    --border-subtle: rgba(83, 107, 103, 0.15);
-    --text-primary: #263532;
-    --text-secondary: #5F6F6B;
-    --text-muted: #7B8985;
-    --accent-primary: #536B67;
-    --accent-secondary: #A9C0B5;
-    --accent-gold: #D6A85F;
+    /* Warm Soft Ivory Light Mode */
+    --bg-main: #fcfbf9;
+    --bg-surface: #f6f4ee;
+    --bg-elevated: #ece8de;
+    --bg-sidebar: #fcfbf9;
+
+    --border-subtle: #e5e0d3;
+    --border-default: #d6cfbf;
+
+    --text-primary: #1a1c1a;
+    --text-secondary: #4a4d4a;
+    --text-muted: #737873;
+
+    --accent-primary: #2d5a43;
+    --accent-sun: #c25e00;
+    --accent-rain: #386470;
+    --accent-alert: #a82e2e;
   }
 
-  html,
+  .dark {
+    /* Deep Ink Slate Dark Mode */
+    --bg-main: #0c0e10;
+    --bg-surface: #121619;
+    --bg-elevated: #1a2024;
+    --bg-sidebar: #0c0e10;
+
+    --border-subtle: #1e252a;
+    --border-default: #2d373e;
+
+    --text-primary: #f0f4f1;
+    --text-secondary: #c5cbc6;
+    --text-muted: #828c84;
+
+    --accent-primary: #4a8b66;
+    --accent-sun: #e07a22;
+    --accent-rain: #5a8a99;
+    --accent-alert: #d95353;
+  }
+
+  /* Apply Inter Tight globally across all elements */
+  *,
   body,
-  #root {
-    margin: 0;
-    padding: 0;
-    width: 100%;
-    min-height: 100vh;
-    background-color: var(--bg-main);
-    color: var(--text-primary);
-    font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-    -webkit-font-smoothing: antialiased;
-  }
-
   button,
   input,
-  textarea,
-  select {
-    font-family: inherit;
+  select,
+  textarea {
+    font-family: 'Inter Tight', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
   }
-}
 
-::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
-}
-::-webkit-scrollbar-track {
-  background: #F4F6F2;
-}
-::-webkit-scrollbar-thumb {
-  background: #A9C0B5;
-  border-radius: 4px;
-}
-::-webkit-scrollbar-thumb:hover {
-  background: #536B67;
+  body {
+    background-color: var(--bg-main);
+    color: var(--text-primary);
+  }
+
+  /* Heading rules maintaining light geometric weight with Inter Tight */
+  h1,
+  h2,
+  h3,
+  .font-heading {
+    font-family: 'Inter Tight', sans-serif;
+    letter-spacing: -0.03em;
+  }
 }

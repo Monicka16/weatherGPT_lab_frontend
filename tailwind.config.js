@@ -9,16 +9,41 @@ export default {
   theme: {
     extend: {
       colors: {
-        bgMain: '#F4F6F2',
-        bgSidebar: '#EBF0E9',
-        bgSurface: '#FFFFFF',
-        bgElevated: '#E4ECE7',
-        textPrimary: '#263532',
-        textSecondary: '#5F6F6B',
-        textMuted: '#7B8985',
-        accentPrimary: '#536B67',
-        accentSecondary: '#A9C0B5',
-        accentGold: '#D6A85F',
+        /* ── Legacy token aliases (WeatherAlerts) ─── */
+        bgMain: 'var(--bg-main)',
+        bgSidebar: 'var(--bg-sidebar)',
+        bgSurface: 'var(--bg-surface)',
+        bgElevated: 'var(--bg-elevated)',
+        borderSubtle: 'var(--border-subtle)',
+        borderDefault: 'var(--border-default)',
+        textPrimary: 'var(--text-primary)',
+        textSecondary: 'var(--text-secondary)',
+        textMuted: 'var(--text-muted)',
+        accentPrimary: 'var(--accent-primary)',
+        accentSecondary: 'var(--accent-secondary)',
+        accentGold: 'var(--accent-sun)',
+        accentSun: 'var(--accent-sun)',
+        accentRain: 'var(--accent-rain)',
+        accentFog: 'var(--accent-fog)',
+        accentNight: 'var(--accent-night)',
+        accentAlert: 'var(--accent-alert)',
+
+        /* ── New canonical Calm Instrument aliases ── */
+        primary: 'var(--text-primary)',
+        secondary: 'var(--text-secondary)',
+        muted: 'var(--text-muted)',
+        surface: 'var(--bg-surface)',
+        'surface-elevated': 'var(--bg-elevated)',
+        border: 'var(--border-subtle)',
+        'border-strong': 'var(--border-default)',
+
+        /* accent shorthands */
+        'accent-base': 'var(--accent-primary)',
+        'accent-sun': 'var(--accent-sun)',
+        'accent-rain': 'var(--accent-rain)',
+        'accent-fog': 'var(--accent-fog)',
+        'accent-night': 'var(--accent-night)',
+        'accent-alert': 'var(--accent-alert)',
       },
       fontFamily: {
         sans: ['Inter', 'system-ui', 'sans-serif'],

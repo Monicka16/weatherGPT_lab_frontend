@@ -110,9 +110,9 @@ export const Sidebar: React.FC<SidebarProps> = ({
 
   const sidebarClasses = `
     fixed inset-y-0 left-0 z-50
-    bg-[#EBF0E9] dark:bg-[#17211E]
-    border-r border-[#536B67]/15 dark:border-[#A9C0B5]/10
-    flex flex-col transition-all duration-300
+    bg-bgSidebar
+    border-r border-borderSubtle
+    flex flex-col transition-all duration-200
     ${isMobileOpen ? 'translate-x-0 w-64' : '-translate-x-full lg:translate-x-0'}
     ${isCollapsed ? 'lg:w-20' : 'lg:w-64'}
   `;
@@ -121,29 +121,29 @@ export const Sidebar: React.FC<SidebarProps> = ({
     <>
       {isMobileOpen && (
         <div
-          className="fixed inset-0 bg-[#263532]/30 dark:bg-black/50 z-40 lg:hidden backdrop-blur-sm"
+          className="fixed inset-0 bg-textPrimary/25 z-40 lg:hidden backdrop-blur-sm"
           onClick={() => setIsMobileOpen(false)}
         />
       )}
 
-      <aside className={sidebarClasses}>
+      <aside className={sidebarClasses} aria-label="Application navigation">
         {/* Logo / Brand */}
-        <div className="p-4 flex items-center justify-between border-b border-[#536B67]/10 dark:border-[#A9C0B5]/10">
+        <div className="p-4 flex items-center justify-between border-b border-borderSubtle">
           <div className="flex items-center gap-3 overflow-hidden">
-            <div className="w-9 h-9 rounded-xl bg-[#536B67] flex items-center justify-center shrink-0 shadow-md">
+            <div className="w-9 h-9 rounded-xl bg-accentPrimary flex items-center justify-center shrink-0 shadow-md">
               <span className="font-bold text-white text-sm">W</span>
             </div>
 
             {(!isCollapsed || isMobileOpen) && (
               <div className="truncate">
                 <div className="flex items-center gap-1.5">
-                  <h1 className="font-semibold text-sm tracking-wide text-[#263532] dark:text-[#E8EFEC]">
+                  <h1 className="font-semibold text-sm tracking-wide text-textPrimary">
                     WEATHERLY
                   </h1>
-                  <Cloud className="w-4 h-4 text-[#5F6F6B] dark:text-[#A9C0B5]" />
+                  <Cloud className="w-4 h-4 text-textSecondary" />
                 </div>
 
-                <p className="text-[10px] text-[#5F6F6B] dark:text-[#8FA19A] font-mono tracking-wider">
+                <p className="text-[10px] text-textMuted font-mono tracking-wider">
                   INTELLIGENCE PLATFORM
                 </p>
               </div>
@@ -152,7 +152,8 @@ export const Sidebar: React.FC<SidebarProps> = ({
 
           <button
             onClick={() => setIsMobileOpen(false)}
-            className="lg:hidden text-[#5F6F6B] dark:text-[#A9C0B5] hover:text-[#263532] dark:hover:text-white p-1"
+            aria-label="Close navigation"
+            className="lg:hidden text-textSecondary hover:text-textPrimary p-1 rounded-lg focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-accentPrimary"
           >
             <X size={20} />
           </button>
@@ -162,7 +163,8 @@ export const Sidebar: React.FC<SidebarProps> = ({
         <div className="p-3">
           <button
             onClick={handleNewConversation}
-            className={`w-full flex items-center justify-center gap-2 bg-[#536B67] hover:bg-[#435754] text-white rounded-xl py-2.5 transition-all duration-200 font-medium text-sm shadow-sm ${
+            aria-label="New Conversation"
+            className={`w-full flex items-center justify-center gap-2 bg-accentPrimary hover:opacity-90 text-white rounded-xl py-2.5 transition-all duration-200 font-medium text-sm shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accentPrimary ${
               isCollapsed && !isMobileOpen ? 'px-0' : 'px-4'
             }`}
           >
@@ -176,7 +178,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
           {navGroups.map((group, idx) => (
             <div key={idx}>
               {(!isCollapsed || isMobileOpen) && (
-                <span className="text-[10px] font-semibold text-[#7B8985] dark:text-[#8FA19A] tracking-wider px-3 uppercase">
+                <span className="text-[10px] font-semibold text-textMuted tracking-wider px-3 uppercase">
                   {group.label}
                 </span>
               )}
@@ -187,39 +189,44 @@ export const Sidebar: React.FC<SidebarProps> = ({
                     key={item.path}
                     to={item.path}
                     onClick={() => setIsMobileOpen(false)}
+                    aria-label={item.label}
                     className={({ isActive }) => `
-                      flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm transition-colors duration-150 relative
+                      flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm transition-colors duration-150 relative focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-accentPrimary
                       ${
                         isActive
-                          ? 'bg-[#A9C0B5]/30 dark:bg-[#A9C0B5]/15 text-[#536B67] dark:text-[#C5D8D0] font-semibold border border-[#536B67]/20 dark:border-[#A9C0B5]/15 shadow-sm'
-                          : 'text-[#5F6F6B] dark:text-[#A9C0B5] hover:text-[#263532] dark:hover:text-[#E8EFEC] hover:bg-[#A9C0B5]/15 dark:hover:bg-[#A9C0B5]/10'
+                          ? 'bg-bgElevated text-accentPrimary font-semibold border border-borderDefault shadow-sm'
+                          : 'text-textSecondary hover:text-textPrimary hover:bg-bgElevated/50'
                       }
                       ${isCollapsed && !isMobileOpen ? 'justify-center px-0' : ''}
                     `}
                     title={isCollapsed ? item.label : undefined}
                   >
-                    <div className="relative flex items-center justify-center">
-                      <item.icon size={18} className="shrink-0" />
+                    {({ isActive }) => (
+                      <>
+                        <div className="relative flex items-center justify-center">
+                          <item.icon size={18} className="shrink-0" />
 
-                      {item.path === '/alerts' && hasMaxActiveAlert && (
-                        <span className="absolute -top-1 -right-1 flex h-2 w-2">
-                          <span className="absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75 animate-ping" />
-                          <span className="relative inline-flex h-2 w-2 rounded-full bg-red-500" />
-                        </span>
-                      )}
-                    </div>
+                          {item.path === '/alerts' && hasMaxActiveAlert && (
+                            <span className="absolute -top-1 -right-1 flex h-2 w-2">
+                              <span className="absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75 animate-ping" />
+                              <span className="relative inline-flex h-2 w-2 rounded-full bg-red-500" />
+                            </span>
+                          )}
+                        </div>
 
-                    {(!isCollapsed || isMobileOpen) && (
-                      <div className="flex items-center justify-between flex-1 min-w-0">
-                        <span className="truncate">{item.label}</span>
+                        {(!isCollapsed || isMobileOpen) && (
+                          <div className="flex items-center justify-between flex-1 min-w-0">
+                            <span className="truncate">{item.label}</span>
 
-                        {item.path === '/alerts' && hasMaxActiveAlert && (
-                          <span className="relative flex h-2 w-2 shrink-0 ml-2">
-                            <span className="absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75 animate-ping" />
-                            <span className="relative inline-flex h-2 w-2 rounded-full bg-red-500" />
-                          </span>
+                            {item.path === '/alerts' && hasMaxActiveAlert && (
+                              <span className="relative flex h-2 w-2 shrink-0 ml-2">
+                                <span className="absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75 animate-ping" />
+                                <span className="relative inline-flex h-2 w-2 rounded-full bg-red-500" />
+                              </span>
+                            )}
+                          </div>
                         )}
-                      </div>
+                      </>
                     )}
                   </NavLink>
                 ))}
@@ -229,18 +236,19 @@ export const Sidebar: React.FC<SidebarProps> = ({
         </div>
 
         {/* Bottom Navigation */}
-        <div className="p-3 border-t border-[#536B67]/10 dark:border-[#A9C0B5]/10 space-y-1">
+        <div className="p-3 border-t border-borderSubtle space-y-1">
           {bottomItems.map((item) => (
             <NavLink
               key={item.path}
               to={item.path}
               onClick={() => setIsMobileOpen(false)}
+              aria-label={item.label}
               className={({ isActive }) => `
-                flex items-center gap-3 px-3 py-2 rounded-xl text-sm transition-colors
+                flex items-center gap-3 px-3 py-2 rounded-xl text-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-accentPrimary
                 ${
                   isActive
-                    ? 'bg-[#A9C0B5]/30 dark:bg-[#A9C0B5]/15 text-[#536B67] dark:text-[#C5D8D0] font-semibold'
-                    : 'text-[#5F6F6B] dark:text-[#A9C0B5] hover:text-[#263532] dark:hover:text-[#E8EFEC] hover:bg-[#A9C0B5]/15 dark:hover:bg-[#A9C0B5]/10'
+                    ? 'bg-bgElevated text-accentPrimary font-semibold'
+                    : 'text-textSecondary hover:text-textPrimary hover:bg-bgElevated/50'
                 }
                 ${isCollapsed && !isMobileOpen ? 'justify-center px-0' : ''}
               `}
@@ -257,7 +265,9 @@ export const Sidebar: React.FC<SidebarProps> = ({
           {/* Collapse Button */}
           <button
             onClick={() => setIsCollapsed(!isCollapsed)}
-            className="hidden lg:flex w-full items-center justify-center py-2 text-[#7B8985] dark:text-[#8FA19A] hover:text-[#263532] dark:hover:text-[#E8EFEC] transition-colors mt-2"
+            aria-label={isCollapsed ? 'Expand navigation sidebar' : 'Collapse navigation sidebar'}
+            className="hidden lg:flex w-full items-center justify-center py-2 text-textMuted hover:text-textPrimary transition-colors mt-2 rounded-lg focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-accentPrimary"
+            title={isCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
           >
             {isCollapsed ? <ChevronRight size={18} /> : <ChevronLeft size={18} />}
           </button>

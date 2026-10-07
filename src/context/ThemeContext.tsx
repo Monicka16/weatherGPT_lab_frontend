@@ -11,10 +11,21 @@ const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 
 export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [theme, setTheme] = useState<Theme>(() => {
-    const savedTheme = localStorage.getItem('weatherly-theme');
+    try {
+      const savedTheme = localStorage.getItem('weatherly-theme');
+      if (savedTheme === 'dark' || savedTheme === 'light') {
+        return savedTheme;
+      }
+    } catch {
+      // Ignore localStorage access errors
+    }
 
-    if (savedTheme === 'dark' || savedTheme === 'light') {
-      return savedTheme;
+    if (
+      typeof window !== 'undefined' &&
+      window.matchMedia &&
+      window.matchMedia('(prefers-color-scheme: dark)').matches
+    ) {
+      return 'dark';
     }
 
     return 'light';
@@ -29,7 +40,11 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       root.classList.remove('dark');
     }
 
-    localStorage.setItem('weatherly-theme', theme);
+    try {
+      localStorage.setItem('weatherly-theme', theme);
+    } catch {
+      // Ignore localStorage access errors
+    }
   }, [theme]);
 
   const toggleTheme = () => {

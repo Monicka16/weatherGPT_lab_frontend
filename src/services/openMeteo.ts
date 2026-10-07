@@ -12,18 +12,27 @@ export interface WeatherMetrics {
   visibilityKm: number;
   weatherCode: number;
   weatherCondition: string;
+  isDay: boolean;
+  cloudCover: number;
+  surfacePressure: number;
+  currentTime: string;
   sunrise: string;
   sunset: string;
   hourly: Array<{
     time: string;
+    rawTime: string;
     temp: number;
     code: number;
+    precipProb: number;
+    precip: number;
   }>;
   daily: Array<{
     date: string;
+    rawDate: string;
     tempMax: number;
     tempMin: number;
     code: number;
+    precipProb: number;
   }>;
 }
 
@@ -49,10 +58,8 @@ export async function fetchLiveWeather(
 ): Promise<WeatherMetrics> {
   const temperatureUnit =
     unit === 'fahrenheit' ? 'fahrenheit' : 'celsius';
-  
-  
 
-  const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lng}&current=temperature_2m,relative_humidity_2m,apparent_temperature,is_day,precipitation,weather_code,wind_speed_10m,wind_direction_10m,visibility,uv_index&hourly=temperature_2m,weather_code,uv_index&daily=weather_code,temperature_2m_max,temperature_2m_min,sunrise,sunset,uv_index_max&temperature_unit=${temperatureUnit}&timezone=auto`;
+  const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lng}&current=temperature_2m,relative_humidity_2m,apparent_temperature,is_day,precipitation,weather_code,wind_speed_10m,wind_direction_10m,visibility,uv_index,surface_pressure,cloud_cover&hourly=temperature_2m,weather_code,uv_index,precipitation_probability,precipitation&daily=weather_code,temperature_2m_max,temperature_2m_min,sunrise,sunset,uv_index_max,precipitation_probability_max&forecast_days=8&temperature_unit=${temperatureUnit}&timezone=auto`;
 
   const response = await fetch(url);
 
@@ -62,10 +69,15 @@ export async function fetchLiveWeather(
 
   const data = await response.json();
 
-  const currentHourIndex = new Date().getHours();
+  const now = new Date();
+  const currentHourISO = now.toISOString().slice(0, 13);
+  let currentHourIndex = data.hourly?.time?.findIndex((t: string) => t.startsWith(currentHourISO));
+  if (currentHourIndex === -1 || currentHourIndex == null) {
+    currentHourIndex = now.getHours();
+  }
 
-  const hourlyForecast = data.hourly.time
-    .slice(currentHourIndex, currentHourIndex + 12)
+  const hourlyForecast = (data.hourly?.time || [])
+    .slice(currentHourIndex, currentHourIndex + 24)
     .map((timeStr: string, idx: number) => {
       const actualIdx = currentHourIndex + idx;
       const date = new Date(timeStr);
@@ -78,13 +90,16 @@ export async function fetchLiveWeather(
                 hour: 'numeric',
                 hour12: true,
               }),
-        temp: Math.round(data.hourly.temperature_2m[actualIdx]),
-        code: data.hourly.weather_code[actualIdx],
+        rawTime: timeStr,
+        temp: Math.round(data.hourly.temperature_2m?.[actualIdx] ?? 0),
+        code: data.hourly.weather_code?.[actualIdx] ?? 0,
+        precipProb: Math.round(data.hourly.precipitation_probability?.[actualIdx] ?? 0),
+        precip: Number((data.hourly.precipitation?.[actualIdx] ?? 0).toFixed(1)),
       };
     });
 
-  const dailyForecast = data.daily.time
-    .slice(0, 5)
+  const dailyForecast = (data.daily?.time || [])
+    .slice(0, 7)
     .map((dateStr: string, idx: number) => {
       const date = new Date(dateStr);
       const dayName =
@@ -94,34 +109,44 @@ export async function fetchLiveWeather(
 
       return {
         date: dayName,
-        tempMax: Math.round(data.daily.temperature_2m_max[idx]),
-        tempMin: Math.round(data.daily.temperature_2m_min[idx]),
-        code: data.daily.weather_code[idx],
+        rawDate: dateStr,
+        tempMax: Math.round(data.daily.temperature_2m_max?.[idx] ?? 0),
+        tempMin: Math.round(data.daily.temperature_2m_min?.[idx] ?? 0),
+        code: data.daily.weather_code?.[idx] ?? 0,
+        precipProb: Math.round(data.daily.precipitation_probability_max?.[idx] ?? 0),
       };
     });
 
   return {
     cityName,
-    currentTemp: Math.round(data.current.temperature_2m),
-    feelsLike: Math.round(data.current.apparent_temperature),
-    tempHigh: Math.round(data.daily.temperature_2m_max[0]),
-    tempLow: Math.round(data.daily.temperature_2m_min[0]),
-    humidity: data.current.relative_humidity_2m,
-    precipitation: data.current.precipitation,
-    windSpeed: Math.round(data.current.wind_speed_10m),
-    windDirection: data.current.wind_direction_10m,
-    uvIndex: Math.round(data.current.uv_index),
-    visibilityKm: Math.round((data.current.visibility || 10000) / 1000),
-    weatherCode: data.current.weather_code,
-    weatherCondition: getWeatherCondition(data.current.weather_code),
-    sunrise: new Date(data.daily.sunrise[0]).toLocaleTimeString([], {
-      hour: '2-digit',
-      minute: '2-digit',
-    }),
-    sunset: new Date(data.daily.sunset[0]).toLocaleTimeString([], {
-      hour: '2-digit',
-      minute: '2-digit',
-    }),
+    currentTemp: Math.round(data.current?.temperature_2m ?? 0),
+    feelsLike: Math.round(data.current?.apparent_temperature ?? 0),
+    tempHigh: Math.round(data.daily?.temperature_2m_max?.[0] ?? data.current?.temperature_2m ?? 0),
+    tempLow: Math.round(data.daily?.temperature_2m_min?.[0] ?? data.current?.temperature_2m ?? 0),
+    humidity: Math.round(data.current?.relative_humidity_2m ?? 0),
+    precipitation: Number((data.current?.precipitation ?? 0).toFixed(1)),
+    windSpeed: Math.round(data.current?.wind_speed_10m ?? 0),
+    windDirection: Math.round(data.current?.wind_direction_10m ?? 0),
+    uvIndex: Math.round(data.current?.uv_index ?? 0),
+    visibilityKm: Math.round((data.current?.visibility || 10000) / 1000),
+    weatherCode: data.current?.weather_code ?? 0,
+    weatherCondition: getWeatherCondition(data.current?.weather_code ?? 0),
+    isDay: data.current?.is_day === 1,
+    cloudCover: Math.round(data.current?.cloud_cover ?? 0),
+    surfacePressure: Math.round(data.current?.surface_pressure ?? 1013),
+    currentTime: data.current?.time || new Date().toISOString(),
+    sunrise: data.daily?.sunrise?.[0]
+      ? new Date(data.daily.sunrise[0]).toLocaleTimeString([], {
+          hour: '2-digit',
+          minute: '2-digit',
+        })
+      : '--:--',
+    sunset: data.daily?.sunset?.[0]
+      ? new Date(data.daily.sunset[0]).toLocaleTimeString([], {
+          hour: '2-digit',
+          minute: '2-digit',
+        })
+      : '--:--',
     hourly: hourlyForecast,
     daily: dailyForecast,
   };

@@ -7,20 +7,35 @@ interface AppLayoutProps {
 }
 
 export const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
-  const [isCollapsed, setIsCollapsed] = useState(false);
+  const [isCollapsed, setIsCollapsed] = useState<boolean>(() => {
+    try {
+      return localStorage.getItem('weatherly_sidebar_collapsed') === 'true';
+    } catch {
+      return false;
+    }
+  });
   const [isMobileOpen, setIsMobileOpen] = useState(false);
 
+  const handleSetCollapsed = (val: boolean) => {
+    setIsCollapsed(val);
+    try {
+      localStorage.setItem('weatherly_sidebar_collapsed', String(val));
+    } catch {
+      // Ignore localStorage errors
+    }
+  };
+
   return (
-    <div className="flex min-h-screen overflow-x-hidden bg-[#F4F6F2] text-[#263532] dark:bg-[#111816] dark:text-[#E8EFEC] transition-colors duration-300">
+    <div className="flex min-h-screen overflow-x-hidden bg-bgMain text-textPrimary transition-colors duration-200">
       <Sidebar
         isCollapsed={isCollapsed}
-        setIsCollapsed={setIsCollapsed}
+        setIsCollapsed={handleSetCollapsed}
         isMobileOpen={isMobileOpen}
         setIsMobileOpen={setIsMobileOpen}
       />
 
       <div
-        className={`flex-1 flex flex-col min-w-0 transition-all duration-300 ${
+        className={`flex-1 flex flex-col min-w-0 transition-all duration-200 ${
           isCollapsed ? 'lg:ml-20' : 'lg:ml-64'
         }`}
       >

@@ -1,17 +1,27 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { ChatMessage } from './ChatMessage';
 import { ChatInput } from './ChatInput';
-import { useChat } from '../../hooks/useChat';
-import { useAuth } from '../../context/AuthContext';
+import { useSharedChat } from '../../context/ChatContext';
 
 export const ConversationAI: React.FC = () => {
   const [searchParams] = useSearchParams();
   const activeId = searchParams.get('id') || undefined;
   const draftQuery = searchParams.get('draft') || searchParams.get('q') || undefined;
 
-  const { user } = useAuth();
-  const { messages, isLoading, error, handleSendMessage } = useChat(activeId, user?.id);
+  const {
+    messages,
+    isLoading,
+    error,
+    handleSendMessage,
+    loadConversation,
+  } = useSharedChat();
+
+  useEffect(() => {
+    if (activeId) {
+      loadConversation(activeId);
+    }
+  }, [activeId, loadConversation]);
 
   const mappedMessages = messages.map((msg) => ({
     id: msg.id,
@@ -24,15 +34,26 @@ export const ConversationAI: React.FC = () => {
   }));
 
   return (
-    <div className="flex flex-col h-full w-full max-w-4xl mx-auto text-[#263532] dark:text-[#E8EFEC] transition-colors duration-300">
+    <div className="flex flex-col h-[calc(100vh-120px)] w-full max-w-4xl mx-auto text-textPrimary transition-colors duration-200">
+      {/* Header Info */}
+      <div className="px-4 py-2 border-b border-borderSubtle flex items-center justify-between text-xs text-textMuted">
+        <span className="font-semibold text-textSecondary uppercase tracking-wider text-[11px]">
+          Weatherly AI Session
+        </span>
+        <span> </span>
+      </div>
+
       {/* Chat Messages */}
-      <div className="flex-1 overflow-y-auto p-4 space-y-4">
+      <div
+        className="flex-1 overflow-y-auto p-4 space-y-4 scrollbar-thin"
+        aria-live="polite"
+      >
         {/* Permanent Welcome Message */}
         <ChatMessage
           message={{
             role: 'assistant',
             content:
-              "Hi! I'm WeatherLY. Ask me about the weather or what activities you can do today!",
+              "Ask Weatherly about the weather around you, from current conditions to what comes next.",
             timestamp: new Date().toLocaleTimeString([], {
               hour: '2-digit',
               minute: '2-digit',
@@ -45,9 +66,9 @@ export const ConversationAI: React.FC = () => {
         ))}
 
         {isLoading && (
-          <div className="flex items-center gap-2 text-[#7B8985] dark:text-[#8FA19A] text-xs italic ml-2 transition-colors">
-            <span className="w-2 h-2 rounded-full bg-[#536B67] dark:bg-[#A9C0B5] animate-ping"></span>
-            WeatherLY is analyzing weather conditions...
+          <div className="flex items-center gap-2 text-textMuted text-xs italic ml-2 transition-colors">
+            <span className="w-2 h-2 rounded-full bg-accentPrimary animate-ping"></span>
+            Weatherly AI is evaluating meteorological data...
           </div>
         )}
 
@@ -59,7 +80,7 @@ export const ConversationAI: React.FC = () => {
       </div>
 
       {/* Chat Input */}
-      <div className="p-4 border-t border-[#536B67]/15 dark:border-[#A9C0B5]/10 transition-colors">
+      <div className="p-4 border-t border-borderSubtle bg-bgSurface/50">
         <ChatInput
           onSendMessage={handleSendMessage}
           disabled={isLoading}

@@ -7,6 +7,8 @@ import { SignIn } from './pages/SignIn';
 import { SignUp } from './pages/SignUp';
 import { ThemeProvider } from './context/ThemeContext';
 import { TemperatureUnitProvider } from './context/TemperatureUnitContext';
+import { TextScaleProvider } from './context/TextScaleContext';
+import { ChatProvider } from './context/ChatContext';
 import { AppLayout } from './components/layout/AppLayout';
 import { Dashboard } from './components/dashboard/Dashboard';
 import { ConversationAI } from './components/chat/ConversationAI';
@@ -23,11 +25,13 @@ import { About } from './components/about/About';
 export const App: React.FC = () => {
   return (
     <ThemeProvider>
-      <TemperatureUnitProvider>
-        <LocationProvider>
-          <BrowserRouter>
-            <AuthProvider>
-              <Routes>
+      <TextScaleProvider>
+        <TemperatureUnitProvider>
+          <LocationProvider>
+            <BrowserRouter>
+              <AuthProvider>
+                <ChatProvider>
+                  <Routes>
                 {/* Public Auth Routes */}
                 <Route path="/signin" element={<SignIn />} />
                 <Route path="/signup" element={<SignUp />} />
@@ -89,11 +93,13 @@ export const App: React.FC = () => {
                     </ProtectedRoute>
                   }
                 />
-              </Routes>
-            </AuthProvider>
-          </BrowserRouter>
-        </LocationProvider>
-      </TemperatureUnitProvider>
+                  </Routes>
+                </ChatProvider>
+              </AuthProvider>
+            </BrowserRouter>
+          </LocationProvider>
+        </TemperatureUnitProvider>
+      </TextScaleProvider>
     </ThemeProvider>
   );
 };
