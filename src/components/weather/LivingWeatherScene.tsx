@@ -1,8 +1,9 @@
-import React, { useEffect, useRef, useMemo } from 'react';
+import React, { useEffect, useRef, useMemo, useState } from 'react';
 import { WeatherMetrics, getWeatherCondition } from '../../services/openMeteo';
 import { formatUpdatedAgo } from '../../utils/weatherVerdict';
 import { MapPin, RefreshCw, Wind, Droplets } from 'lucide-react';
 import { useTheme } from '../../context/ThemeContext';
+import { startScene, SceneKind } from './sceneEngine';
 
 export type ResolvedSceneType =
   | 'clear'
@@ -21,6 +22,8 @@ interface LivingWeatherSceneProps {
   className?: string;
 }
 
+const PREVIEW_KINDS: SceneKind[] = ['clear', 'partly-cloudy', 'cloudy', 'rain', 'storm', 'fog'];
+
 export const LivingWeatherScene: React.FC<LivingWeatherSceneProps> = ({
   weather,
   locationName = 'Your Location',
@@ -32,230 +35,56 @@ export const LivingWeatherScene: React.FC<LivingWeatherSceneProps> = ({
   const { theme } = useTheme();
   const isDarkMode = theme === 'dark';
 
-  const scene: ResolvedSceneType = useMemo(() => {
-    if (!weather) return 'clear';
+  // 1) Real conditions from the weather data
+  const { kind: realKind, night: realNight } = useMemo(() => {
+    if (!weather) return { kind: 'clear' as SceneKind, night: false };
 
     const { weatherCode, isDay, precipitation, visibilityKm, cloudCover } = weather;
+    let k: SceneKind = 'clear';
 
-    if (!isDay) return 'night';
-    if (weatherCode >= 95) return 'storm';
-    if (
+    if (weatherCode >= 95) k = 'storm';
+    else if (
       precipitation > 0.4 ||
       (weatherCode >= 51 && weatherCode <= 65) ||
       (weatherCode >= 80 && weatherCode <= 82)
-    ) {
-      return 'rain';
-    }
-    if (
+    ) k = 'rain';
+    else if (
       weatherCode === 45 ||
       weatherCode === 48 ||
       (visibilityKm != null && visibilityKm <= 3)
-    ) {
-      return 'fog';
-    }
-    if (weatherCode >= 2 || cloudCover >= 60) return 'cloudy';
-    if (weatherCode === 1 || cloudCover >= 25) return 'partly-cloudy';
+    ) k = 'fog';
+    else if (weatherCode >= 2 || cloudCover >= 60) k = 'cloudy';
+    else if (weatherCode === 1 || cloudCover >= 25) k = 'partly-cloudy';
 
-    return 'clear';
+    return { kind: k, night: !isDay };
   }, [weather]);
+
+  // 2) Dev-only preview override (null = use the real weather)
+  const [debug, setDebug] = useState<{ kind: SceneKind; night: boolean } | null>(null);
+  const kind = debug?.kind ?? realKind;
+  const night = debug?.night ?? realNight;
+  const scene: ResolvedSceneType = night ? 'night' : kind;
 
   const updatedAgo = useMemo(
     () => (weather?.currentTime ? formatUpdatedAgo(weather.currentTime) : 'just now'),
     [weather?.currentTime]
   );
 
+  // 3) Start the animation
+  const windSpeed = weather?.windSpeed ?? 10;
+  const precip = weather?.precipitation ?? 0;
+
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
-    const ctx = canvas.getContext('2d');
-    if (!ctx) return;
-
-    let animationFrameId: number;
-    let isVisible = document.visibilityState === 'visible';
-
-    const prefersReducedMotion =
-      typeof window !== 'undefined' &&
-      window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-
-    const resizeCanvas = () => {
-      const rect = canvas.getBoundingClientRect();
-      const dpr = window.devicePixelRatio || 1;
-      canvas.width = rect.width * dpr;
-      canvas.height = rect.height * dpr;
-      ctx.scale(dpr, dpr);
-    };
-    resizeCanvas();
-    window.addEventListener('resize', resizeCanvas);
-
-    const onVisibilityChange = () => {
-      isVisible = document.visibilityState === 'visible';
-    };
-    document.addEventListener('visibilitychange', onVisibilityChange);
-
-    const rect = canvas.getBoundingClientRect();
-    const width = rect.width || 600;
-    const height = rect.height || 320;
-
-    const rainCount = scene === 'storm' ? 80 : scene === 'rain' ? 50 : 0;
-    const raindrops: Array<{ x: number; y: number; speed: number; length: number }> = [];
-    for (let i = 0; i < rainCount; i++) {
-      raindrops.push({
-        x: Math.random() * width,
-        y: Math.random() * height,
-        speed: (scene === 'storm' ? 12 : 8) + Math.random() * 3,
-        length: 10 + Math.random() * 8,
-      });
-    }
-
-    const windSpeed = weather?.windSpeed ?? 10;
-    const cloudSpeed = Math.max(0.12, Math.min(1.0, windSpeed / 40));
-    const clouds: Array<{ x: number; y: number; radius: number; speed: number; opacity: number }> = [
-      { x: 50, y: 55, radius: 70, speed: cloudSpeed * 0.3, opacity: 0.18 },
-      { x: 200, y: 35, radius: 90, speed: cloudSpeed * 0.4, opacity: 0.22 },
-      { x: 360, y: 70, radius: 75, speed: cloudSpeed * 0.35, opacity: 0.16 },
-    ];
-
-    const stars: Array<{ x: number; y: number; size: number; alpha: number; delta: number }> = [];
-    if (scene === 'night') {
-      for (let i = 0; i < 45; i++) {
-        stars.push({
-          x: Math.random() * width,
-          y: Math.random() * (height * 0.7),
-          size: Math.random() * 1.4 + 0.5,
-          alpha: Math.random() * 0.6 + 0.3,
-          delta: (Math.random() - 0.5) * 0.01,
-        });
-      }
-    }
-
-    const render = () => {
-      const currentWidth = canvas.clientWidth;
-      const currentHeight = canvas.clientHeight;
-      ctx.clearRect(0, 0, currentWidth, currentHeight);
-
-      const bgGrad = ctx.createLinearGradient(0, 0, 0, currentHeight);
-
-      if (!isDarkMode) {
-        if (scene === 'clear') {
-          bgGrad.addColorStop(0, '#fef3c7');
-          bgGrad.addColorStop(1, '#fcfbf9');
-        } else if (scene === 'partly-cloudy') {
-          bgGrad.addColorStop(0, '#e8ece9');
-          bgGrad.addColorStop(1, '#fcfbf9');
-        } else if (scene === 'cloudy') {
-          bgGrad.addColorStop(0, '#e2e5e2');
-          bgGrad.addColorStop(1, '#f6f4ee');
-        } else if (scene === 'rain') {
-          bgGrad.addColorStop(0, '#dce3e0');
-          bgGrad.addColorStop(1, '#fcfbf9');
-        } else if (scene === 'fog') {
-          bgGrad.addColorStop(0, '#edebe4');
-          bgGrad.addColorStop(1, '#f6f4ee');
-        } else {
-          bgGrad.addColorStop(0, '#1c2420');
-          bgGrad.addColorStop(1, '#0e1411');
-        }
-      } else {
-        if (scene === 'clear') {
-          bgGrad.addColorStop(0, 'rgba(194, 94, 0, 0.18)');
-          bgGrad.addColorStop(1, '#121619');
-        } else if (scene === 'partly-cloudy' || scene === 'cloudy') {
-          bgGrad.addColorStop(0, 'rgba(30, 40, 35, 0.65)');
-          bgGrad.addColorStop(1, '#121619');
-        } else if (scene === 'rain' || scene === 'storm') {
-          bgGrad.addColorStop(0, 'rgba(20, 30, 26, 0.85)');
-          bgGrad.addColorStop(1, '#0c0e10');
-        } else {
-          bgGrad.addColorStop(0, 'rgba(18, 26, 22, 0.95)');
-          bgGrad.addColorStop(1, '#0c0e10');
-        }
-      }
-
-      ctx.fillStyle = bgGrad;
-      ctx.fillRect(0, 0, currentWidth, currentHeight);
-
-      if (scene === 'clear' || scene === 'partly-cloudy') {
-        const sunX = currentWidth * 0.85;
-        const sunY = currentHeight * 0.28;
-        const glow = ctx.createRadialGradient(sunX, sunY, 10, sunX, sunY, 80);
-        glow.addColorStop(0, isDarkMode ? 'rgba(224, 122, 34, 0.25)' : 'rgba(194, 94, 0, 0.2)');
-        glow.addColorStop(1, 'rgba(224, 122, 34, 0)');
-        ctx.fillStyle = glow;
-        ctx.beginPath();
-        ctx.arc(sunX, sunY, 80, 0, Math.PI * 2);
-        ctx.fill();
-
-        ctx.fillStyle = isDarkMode ? '#e07a22' : '#c25e00';
-        ctx.beginPath();
-        ctx.arc(sunX, sunY, 32, 0, Math.PI * 2);
-        ctx.fill();
-      } else if (scene === 'night') {
-        const moonX = currentWidth * 0.85;
-        const moonY = currentHeight * 0.28;
-        ctx.fillStyle = 'rgba(240, 244, 241, 0.85)';
-        ctx.beginPath();
-        ctx.arc(moonX, moonY, 26, 0, Math.PI * 2);
-        ctx.fill();
-
-        stars.forEach((star) => {
-          star.alpha += star.delta;
-          if (star.alpha > 0.8 || star.alpha < 0.2) star.delta = -star.delta;
-          ctx.fillStyle = `rgba(240, 244, 241, ${star.alpha})`;
-          ctx.beginPath();
-          ctx.arc(star.x, star.y, star.size, 0, Math.PI * 2);
-          ctx.fill();
-        });
-      }
-
-      if (['partly-cloudy', 'cloudy', 'storm', 'fog', 'rain'].includes(scene)) {
-        clouds.forEach((cloud) => {
-          if (!prefersReducedMotion) {
-            cloud.x += cloud.speed;
-            if (cloud.x - cloud.radius > currentWidth) cloud.x = -cloud.radius;
-          }
-          const cloudGrad = ctx.createRadialGradient(cloud.x, cloud.y, 10, cloud.x, cloud.y, cloud.radius);
-          const color = !isDarkMode ? '255, 255, 255' : '130, 140, 134';
-          cloudGrad.addColorStop(0, `rgba(${color}, ${cloud.opacity})`);
-          cloudGrad.addColorStop(1, `rgba(${color}, 0)`);
-          ctx.fillStyle = cloudGrad;
-          ctx.beginPath();
-          ctx.arc(cloud.x, cloud.y, cloud.radius, 0, Math.PI * 2);
-          ctx.fill();
-        });
-      }
-
-      if (['rain', 'storm'].includes(scene)) {
-        ctx.strokeStyle = !isDarkMode ? 'rgba(56, 100, 112, 0.35)' : 'rgba(90, 138, 153, 0.4)';
-        ctx.lineWidth = 1.2;
-        raindrops.forEach((drop) => {
-          ctx.beginPath();
-          ctx.moveTo(drop.x, drop.y);
-          ctx.lineTo(drop.x - 1.5, drop.y + drop.length);
-          ctx.stroke();
-
-          if (!prefersReducedMotion) {
-            drop.y += drop.speed;
-            if (drop.y > currentHeight) {
-              drop.y = -10;
-              drop.x = Math.random() * currentWidth;
-            }
-          }
-        });
-      }
-
-      if (isVisible && !prefersReducedMotion) {
-        animationFrameId = requestAnimationFrame(render);
-      }
-    };
-
-    render();
-
-    return () => {
-      cancelAnimationFrame(animationFrameId);
-      window.removeEventListener('resize', resizeCanvas);
-      document.removeEventListener('visibilitychange', onVisibilityChange);
-    };
-  }, [scene, weather, isDarkMode]);
+    return startScene(canvas, {
+      kind,
+      night,
+      dark: isDarkMode,
+      windSpeed,
+      precipitation: precip,
+    });
+  }, [kind, night, isDarkMode, windSpeed, precip]);
 
   const isNightScene = scene === 'night';
   const isLightModeNight = !isDarkMode && isNightScene;
@@ -269,6 +98,35 @@ export const LivingWeatherScene: React.FC<LivingWeatherSceneProps> = ({
       } transition-colors duration-200 ${className}`}
     >
       <canvas ref={canvasRef} className="w-full h-full block absolute inset-0 pointer-events-none" />
+
+      {/* Dev-only preview switcher (hidden in production builds) */}
+      {import.meta.env.DEV && (
+        <div className="absolute bottom-2 right-2 z-20 flex flex-wrap gap-1 justify-end max-w-[75%]">
+          {PREVIEW_KINDS.map((k) => (
+            <button
+              key={k}
+              onClick={() => setDebug({ kind: k, night })}
+              className={`px-2 py-0.5 text-[10px] rounded text-white ${
+                kind === k ? 'bg-emerald-600' : 'bg-black/60'
+              }`}
+            >
+              {k}
+            </button>
+          ))}
+          <button
+            onClick={() => setDebug({ kind, night: !night })}
+            className="px-2 py-0.5 text-[10px] rounded bg-black/60 text-white"
+          >
+            {night ? 'night' : 'day'}
+          </button>
+          <button
+            onClick={() => setDebug(null)}
+            className="px-2 py-0.5 text-[10px] rounded bg-black/60 text-white"
+          >
+            live
+          </button>
+        </div>
+      )}
 
       <div
         className={`relative z-10 p-6 sm:p-8 flex flex-col justify-between h-full space-y-6 ${
