@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
 import {
@@ -76,6 +77,11 @@ export const Sidebar: React.FC<SidebarProps> = ({
     if (isMobileOpen) setIsMobileOpen(false);
   };
 
+  const handleLogoClick = () => {
+    navigate('/');
+    if (isMobileOpen) setIsMobileOpen(false);
+  };
+
   const navGroups = [
     {
       label: 'MAIN',
@@ -129,7 +135,13 @@ export const Sidebar: React.FC<SidebarProps> = ({
       <aside className={sidebarClasses} aria-label="Application navigation">
         {/* Logo / Brand */}
         <div className="p-4 flex items-center justify-between border-b border-borderSubtle">
-          <div className="flex items-center gap-3 overflow-hidden">
+          <button
+            type="button"
+            onClick={handleLogoClick}
+            aria-label="Go to WeatherLY dashboard"
+            title="Go to Dashboard"
+            className="flex items-center gap-3 overflow-hidden text-left rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accentPrimary"
+          >
             <div className="w-9 h-9 rounded-xl bg-accentPrimary flex items-center justify-center shrink-0 shadow-md">
               <span className="font-bold text-white text-sm">W</span>
             </div>
@@ -148,7 +160,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                 </p>
               </div>
             )}
-          </div>
+          </button>
 
           <button
             onClick={() => setIsMobileOpen(false)}
