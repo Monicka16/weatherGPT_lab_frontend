@@ -180,8 +180,6 @@ function formatPressure(
 
   const parts: string[] = [];
 
-  // This API's altim value matches the Qxxxx pressure in the METAR,
-  // which is reported in hPa for the provided response.
   if (altim != null && Number.isFinite(altim)) {
     parts.push(`${altim.toFixed(0)} hPa`);
   }
@@ -271,7 +269,9 @@ function describeWeather(raw?: string): string {
     }
   }
 
-  return descriptions.length ? `${intensity}${descriptions.join(', ')}` : raw;
+  return descriptions.length
+    ? `${intensity}${descriptions.join(', ')}`
+    : raw;
 }
 
 function getObservationDate(metar: MetarData): Date | null {
@@ -293,22 +293,24 @@ function getObservationDate(metar: MetarData): Date | null {
   return null;
 }
 
-function getObservationAge(date: Date | null): string {
-  if (!date) return 'Observation time unavailable';
-
+function formatObservationAgeShort(date: Date): string {
   const elapsed = Math.max(0, Date.now() - date.getTime());
   const minutes = Math.floor(elapsed / 60_000);
 
-  if (minutes < 1) return 'Observed just now';
-  if (minutes < 60) return `Observed ${minutes} min ago`;
+  if (minutes < 1) return 'just now';
+  if (minutes < 60) return `${minutes}m ago`;
 
   const hours = Math.floor(minutes / 60);
+  const remainingMinutes = minutes % 60;
 
   if (hours < 24) {
-    return `Observed ${hours}h ${minutes % 60}m ago`;
+    return remainingMinutes
+      ? `${hours}h ${remainingMinutes}m ago`
+      : `${hours}h ago`;
   }
 
-  return `Observed ${Math.floor(hours / 24)}d ago`;
+  const days = Math.floor(hours / 24);
+  return `${days}d ago`;
 }
 
 function getCategory(metar: MetarData): string | null {
@@ -324,13 +326,18 @@ const SECTION_TITLE =
   'font-heading font-medium tracking-tight text-textPrimary text-base leading-6';
 
 const METRIC_VALUE =
-  'font-heading font-medium tabular-nums tracking-tight text-textPrimary text-2xl leading-8 mt-1';
+  'mt-1 font-heading text-2xl font-medium leading-8 tracking-tight text-textPrimary tabular-nums';
 
 const METRIC_LABEL =
   'text-xs leading-5 text-textMuted';
 
 const CARD =
   'h-full min-w-0 rounded-2xl border border-borderSubtle bg-bgSurface p-4 sm:p-5';
+
+// Reserve two consistent footer rows in every metric card.
+// Single-line footers sit in the second row; Pressure uses both rows.
+const METRIC_FOOTER =
+  'mt-auto grid min-h-[56px] grid-rows-[20px_20px] content-end pt-3';
 
 // --------------------------------------------------
 // Component
@@ -495,7 +502,6 @@ export const AviationWeather: React.FC = () => {
   ];
 
   const observationDate = metar ? getObservationDate(metar) : null;
-  const observationAge = getObservationAge(observationDate);
   const category = metar ? getCategory(metar) : null;
   const categoryInfo = category ? FLIGHT_CATEGORIES[category] : null;
   const cloudCeiling = getCeiling(metar?.clouds);
@@ -524,7 +530,7 @@ export const AviationWeather: React.FC = () => {
         ref={containerRef}
         className="relative rounded-2xl border border-borderSubtle bg-bgSurface p-4 shadow-xs"
       >
-        <div className="flex flex-col gap-3 sm:flex-row">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-stretch">
           <div className="relative min-w-0 flex-1">
             <Plane
               size={17}
@@ -544,7 +550,7 @@ export const AviationWeather: React.FC = () => {
               role="combobox"
               aria-autocomplete="list"
               aria-expanded={isDropdownOpen}
-              className="w-full rounded-xl border border-borderSubtle bg-bgElevated py-3 pl-11 pr-10 text-sm leading-5 text-textPrimary placeholder:text-textMuted focus:border-[var(--accent-primary)] focus:outline-none"
+              className="min-h-[46px] w-full rounded-xl border border-borderSubtle bg-bgElevated py-3 pl-11 pr-10 text-sm leading-5 text-textPrimary placeholder:text-textMuted focus:border-[var(--accent-primary)] focus:outline-none"
             />
 
             {airportInput && (
@@ -628,7 +634,7 @@ export const AviationWeather: React.FC = () => {
             onClick={() => {
               if (selectedAirport) void handleSelectAirport(selectedAirport);
             }}
-            className="flex shrink-0 items-center justify-center gap-2 rounded-xl bg-[var(--accent-primary)] px-5 py-3 text-sm font-medium text-white transition-opacity hover:opacity-90 disabled:opacity-50"
+            className="flex min-h-[46px] shrink-0 items-center justify-center gap-2 rounded-xl bg-[var(--accent-primary)] px-5 py-3 text-sm font-medium leading-5 text-white transition-opacity hover:opacity-90 disabled:opacity-50 sm:self-stretch"
           >
             <Search size={16} />
             {loading ? 'Fetching METAR...' : 'Refresh Conditions'}
@@ -636,7 +642,7 @@ export const AviationWeather: React.FC = () => {
         </div>
 
         {selectedAirport && (
-          <div className="mt-3 flex items-center justify-between gap-3 rounded-lg border border-borderSubtle bg-bgElevated px-3.5 py-2 text-xs leading-5 text-textSecondary">
+          <div className="mt-3 flex w-full items-center justify-between gap-3 rounded-lg border border-borderSubtle bg-bgElevated px-3.5 py-2 text-xs leading-5 text-textSecondary">
             <div className="flex min-w-0 items-center gap-2">
               <Check
                 size={14}
@@ -704,7 +710,7 @@ export const AviationWeather: React.FC = () => {
         <div className="space-y-4 sm:space-y-5">
           {/* Station Overview */}
           <section className="rounded-2xl border border-borderSubtle bg-bgSurface p-4 sm:p-5">
-            <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+            <div className="flex flex-col gap-4 sm:flex-row sm:items-stretch sm:justify-between">
               <div className="min-w-0 flex-1">
                 <div className="mb-2 flex items-center gap-2 text-xs leading-5 uppercase tracking-widest text-textMuted">
                   <Plane
@@ -740,18 +746,15 @@ export const AviationWeather: React.FC = () => {
                       ? `Observed ${observationDate.toLocaleString(undefined, {
                           dateStyle: 'medium',
                           timeStyle: 'short',
-                        })}`
+                        })} (${formatObservationAgeShort(observationDate)})`
                       : 'Observation timestamp unavailable'}
                   </span>
                 </div>
-
-                <p className="mt-1 text-xs leading-5 text-textMuted">
-                  {observationAge}
-                </p>
               </div>
 
+              {/* Flight Category */}
               <div
-                className={`w-full rounded-xl border p-4 sm:w-48 sm:shrink-0 ${
+                className={`flex w-full flex-col justify-center rounded-xl border p-4 sm:w-48 sm:shrink-0 ${
                   category
                     ? CATEGORY_STYLES[category]
                     : 'border-borderSubtle bg-bgElevated text-textPrimary'
@@ -765,14 +768,14 @@ export const AviationWeather: React.FC = () => {
                   {category || 'N/A'}
                 </div>
 
-                <p className="mt-1 text-xs leading-relaxed">
+                <p className="mt-2 text-xs leading-relaxed">
                   {categoryInfo?.label || 'Category not reported'}
                 </p>
               </div>
             </div>
 
             {categoryInfo && (
-              <div className="mt-4 border-t border-borderSubtle pt-4">
+              <div className="mt-3 border-t border-borderSubtle pt-3 sm:pl-1">
                 <p className="text-sm leading-relaxed text-textSecondary">
                   {categoryInfo.description}
                 </p>
@@ -781,7 +784,8 @@ export const AviationWeather: React.FC = () => {
           </section>
 
           {/* Primary Metrics */}
-          <section className="grid grid-cols-2 gap-3 xl:grid-cols-4">
+          <section className="grid grid-cols-2 items-stretch gap-3 xl:grid-cols-4">
+            {/* Temperature */}
             <div className={`${CARD} flex flex-col`}>
               <Thermometer
                 size={18}
@@ -791,28 +795,36 @@ export const AviationWeather: React.FC = () => {
               <p className={METRIC_VALUE}>
                 {formatTemperature(metar.temp, temperatureUnit)}
               </p>
-              <p className="mt-auto pt-3 text-xs leading-5 text-textMuted">
-                {metar.dewp != null
-                  ? `Dew point ${formatTemperature(metar.dewp, temperatureUnit)}`
-                  : 'Dew point not reported'}
-              </p>
+
+              <div className={METRIC_FOOTER}>
+                <p className="row-span-2 self-end text-xs leading-5 text-textMuted">
+                  {metar.dewp != null
+                    ? `Dew point ${formatTemperature(metar.dewp, temperatureUnit)}`
+                    : 'Dew point not reported'}
+                </p>
+              </div>
             </div>
 
+            {/* Wind */}
             <div className={`${CARD} flex flex-col`}>
               <Wind
                 size={18}
                 className="mb-3 text-[var(--accent-primary)]"
               />
               <p className={METRIC_LABEL}>Surface Wind</p>
-              <p className="mt-1 font-heading text-xl font-medium leading-7 tracking-tight text-textPrimary tabular-nums">
+              <p className={METRIC_VALUE}>
                 {formatWindSpeed(metar.wspd, metar.wgst)}
               </p>
-              <div className="mt-auto flex items-center gap-1.5 pt-3 text-xs leading-5 text-textMuted">
-                <Compass size={13} className="shrink-0" />
-                <span>{formatWindDirection(metar.wdir)}</span>
+
+              <div className={METRIC_FOOTER}>
+                <div className="row-span-2 flex min-h-5 items-center gap-1.5 self-end text-xs leading-5 text-textMuted">
+                  <Compass size={13} className="shrink-0" />
+                  <span>{formatWindDirection(metar.wdir)}</span>
+                </div>
               </div>
             </div>
 
+            {/* Visibility */}
             <div className={`${CARD} flex flex-col`}>
               <Eye
                 size={18}
@@ -822,58 +834,67 @@ export const AviationWeather: React.FC = () => {
               <p className={METRIC_VALUE}>
                 {formatVisibility(metar.visib)}
               </p>
-              <p className="mt-auto pt-3 text-xs leading-5 text-textMuted">
-                Reported visibility
-              </p>
+
+              <div className={METRIC_FOOTER}>
+                <p className="row-span-2 self-end text-xs leading-5 text-textMuted">
+                  Reported visibility
+                </p>
+              </div>
             </div>
 
+            {/* Pressure */}
             <div className={`${CARD} flex flex-col`}>
               <Gauge
                 size={18}
                 className="mb-3 text-[var(--accent-primary)]"
               />
               <p className={METRIC_LABEL}>Pressure</p>
-              <p className="mt-1 font-heading text-xl font-medium leading-7 tracking-tight text-textPrimary tabular-nums">
+              <p className={METRIC_VALUE}>
                 {metar.altim != null && Number.isFinite(metar.altim)
                   ? `${metar.altim.toFixed(0)} hPa`
                   : '--'}
               </p>
-              <p className="mt-1 text-xs leading-5 text-textSecondary tabular-nums">
-                {formatPressureInHg(metar.altim)}
-              </p>
-              <p className="mt-auto pt-2 text-xs leading-5 text-textMuted">
-                {metar.slp != null && Number.isFinite(metar.slp)
-                  ? `Sea level: ${metar.slp.toFixed(1)} hPa`
-                  : 'Sea-level pressure not reported'}
-              </p>
+
+              <div className={METRIC_FOOTER}>
+                <p className="self-end text-xs leading-5 text-textSecondary tabular-nums">
+                  {formatPressureInHg(metar.altim)}
+                </p>
+                <p className="self-end text-xs leading-5 text-textMuted">
+                  {metar.slp != null && Number.isFinite(metar.slp)
+                    ? `Sea level: ${metar.slp.toFixed(1)} hPa`
+                    : 'Sea-level pressure not reported'}
+                </p>
+              </div>
             </div>
           </section>
 
           {/* Weather Interpretation and Ceiling */}
-          <section className="grid grid-cols-1 gap-4 md:grid-cols-2">
-            <div className={CARD}>
-              <div className="mb-4 flex items-center gap-2">
-                <Cloud
-                  size={18}
-                  className="text-[var(--accent-primary)]"
-                />
-                <h3 className={SECTION_TITLE}>Present Weather</h3>
-              </div>
-
-              <p className="text-base font-medium leading-6 text-textPrimary">
-                {describeWeather(metar.wxString)}
-              </p>
-
-              {metar.wxString && (
-                <div className="mt-3 inline-flex items-center gap-2 rounded-lg border border-borderSubtle bg-bgElevated px-2.5 py-1.5">
-                  <span className="text-[10px] uppercase leading-4 tracking-wider text-textMuted">
-                    Source code
-                  </span>
-                  <code className="font-mono text-xs text-[var(--accent-primary)]">
-                    {metar.wxString}
-                  </code>
+          <section className="grid grid-cols-1 items-stretch gap-4 md:grid-cols-2">
+            <div className={`${CARD} flex h-full flex-col justify-between`}>
+              <div>
+                <div className="mb-4 flex items-center gap-2">
+                  <Cloud
+                    size={18}
+                    className="text-[var(--accent-primary)]"
+                  />
+                  <h3 className={SECTION_TITLE}>Present Weather</h3>
                 </div>
-              )}
+
+                <p className="text-base font-medium leading-6 text-textPrimary">
+                  {describeWeather(metar.wxString)}
+                </p>
+
+                {metar.wxString && (
+                  <div className="mt-3 inline-flex items-center gap-2 rounded-lg border border-borderSubtle bg-bgElevated px-2.5 py-1.5">
+                    <span className="text-[10px] uppercase leading-4 tracking-wider text-textMuted">
+                      Source code
+                    </span>
+                    <code className="font-mono text-xs text-[var(--accent-primary)]">
+                      {metar.wxString}
+                    </code>
+                  </div>
+                )}
+              </div>
 
               <p className="mt-4 text-xs leading-relaxed text-textMuted">
                 This is a basic interpretation of the reported weather code.
@@ -881,18 +902,20 @@ export const AviationWeather: React.FC = () => {
               </p>
             </div>
 
-            <div className={CARD}>
-              <div className="mb-4 flex items-center gap-2">
-                <Cloud
-                  size={18}
-                  className="text-[var(--accent-primary)]"
-                />
-                <h3 className={SECTION_TITLE}>Cloud Ceiling</h3>
-              </div>
+            <div className={`${CARD} flex h-full flex-col justify-between`}>
+              <div>
+                <div className="mb-4 flex items-center gap-2">
+                  <Cloud
+                    size={18}
+                    className="text-[var(--accent-primary)]"
+                  />
+                  <h3 className={SECTION_TITLE}>Cloud Ceiling</h3>
+                </div>
 
-              <p className="break-words font-heading text-2xl font-medium leading-8 tracking-tight text-textPrimary">
-                {cloudCeiling}
-              </p>
+                <p className="break-words font-heading text-2xl font-medium leading-8 tracking-tight text-textPrimary">
+                  {cloudCeiling}
+                </p>
+              </div>
 
               <p className="mt-3 text-xs leading-relaxed text-textMuted">
                 Derived from the lowest reported broken (BKN), overcast
@@ -937,7 +960,7 @@ export const AviationWeather: React.FC = () => {
                       </div>
                     </div>
 
-                    <div className="sm:shrink-0 sm:text-right">
+                    <div className="w-full text-right sm:w-auto sm:shrink-0">
                       <p className="font-mono text-sm leading-5 text-textPrimary tabular-nums">
                         {cloud.base != null
                           ? `${cloud.base.toLocaleString()} ft`
@@ -967,7 +990,13 @@ export const AviationWeather: React.FC = () => {
 
               <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                 {metar.dewp != null && (
-                  <div className="flex items-center gap-3 rounded-xl bg-bgElevated p-3">
+                  <div
+                    className={`flex items-center gap-3 rounded-xl bg-bgElevated p-3 ${
+                      metar.wgst == null && metar.slp == null
+                        ? 'sm:col-span-2'
+                        : ''
+                    }`}
+                  >
                     <Droplets
                       size={17}
                       className="shrink-0 text-[var(--accent-primary)]"
