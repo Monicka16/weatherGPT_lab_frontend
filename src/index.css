@@ -21,6 +21,8 @@
     --accent-sun: #c25e00;
     --accent-rain: #386470;
     --accent-alert: #a82e2e;
+
+    --scrollbar-thumb: #d6cfbf;
   }
 
   .dark {
@@ -41,6 +43,8 @@
     --accent-sun: #e07a22;
     --accent-rain: #5a8a99;
     --accent-alert: #d95353;
+
+    --scrollbar-thumb: #35434a;
   }
 
   /* Apply Inter Tight globally across all elements */
@@ -69,3 +73,23 @@
     letter-spacing: -0.03em;
   }
 }
+
+.scrollbar-thin {
+  scrollbar-width: thin;
+  scrollbar-color: var(--scrollbar-thumb) transparent;
+}
+
+.scrollbar-thin::-webkit-scrollbar {
+  width: 5px;
+  height: 5px;
+}
+
+.scrollbar-thin::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.scrollbar-thin::-webkit-scrollbar-thumb {
+  background-color: var(--scrollbar-thumb);
+  border-radius: 999px;
+}
+

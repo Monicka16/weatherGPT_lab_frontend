@@ -22,7 +22,14 @@ interface LivingWeatherSceneProps {
   className?: string;
 }
 
-const PREVIEW_KINDS: SceneKind[] = ['clear', 'partly-cloudy', 'cloudy', 'rain', 'storm', 'fog'];
+const PREVIEW_KINDS: SceneKind[] = [
+  'clear',
+  'partly-cloudy',
+  'cloudy',
+  'rain',
+  'storm',
+  'fog',
+];
 
 export const LivingWeatherScene: React.FC<LivingWeatherSceneProps> = ({
   weather,
@@ -37,36 +44,58 @@ export const LivingWeatherScene: React.FC<LivingWeatherSceneProps> = ({
 
   // 1) Real conditions from the weather data
   const { kind: realKind, night: realNight } = useMemo(() => {
-    if (!weather) return { kind: 'clear' as SceneKind, night: false };
+    if (!weather) {
+      return { kind: 'clear' as SceneKind, night: false };
+    }
 
-    const { weatherCode, isDay, precipitation, visibilityKm, cloudCover } = weather;
+    const {
+      weatherCode,
+      isDay,
+      precipitation,
+      visibilityKm,
+      cloudCover,
+    } = weather;
+
     let k: SceneKind = 'clear';
 
-    if (weatherCode >= 95) k = 'storm';
-    else if (
+    if (weatherCode >= 95) {
+      k = 'storm';
+    } else if (
       precipitation > 0.4 ||
       (weatherCode >= 51 && weatherCode <= 65) ||
       (weatherCode >= 80 && weatherCode <= 82)
-    ) k = 'rain';
-    else if (
+    ) {
+      k = 'rain';
+    } else if (
       weatherCode === 45 ||
       weatherCode === 48 ||
       (visibilityKm != null && visibilityKm <= 3)
-    ) k = 'fog';
-    else if (weatherCode >= 2 || cloudCover >= 60) k = 'cloudy';
-    else if (weatherCode === 1 || cloudCover >= 25) k = 'partly-cloudy';
+    ) {
+      k = 'fog';
+    } else if (weatherCode >= 2 || cloudCover >= 60) {
+      k = 'cloudy';
+    } else if (weatherCode === 1 || cloudCover >= 25) {
+      k = 'partly-cloudy';
+    }
 
     return { kind: k, night: !isDay };
   }, [weather]);
 
   // 2) Dev-only preview override (null = use the real weather)
-  const [debug, setDebug] = useState<{ kind: SceneKind; night: boolean } | null>(null);
+  const [debug, setDebug] = useState<{
+    kind: SceneKind;
+    night: boolean;
+  } | null>(null);
+
   const kind = debug?.kind ?? realKind;
   const night = debug?.night ?? realNight;
   const scene: ResolvedSceneType = night ? 'night' : kind;
 
   const updatedAgo = useMemo(
-    () => (weather?.currentTime ? formatUpdatedAgo(weather.currentTime) : 'just now'),
+    () =>
+      weather?.currentTime
+        ? formatUpdatedAgo(weather.currentTime)
+        : 'just now',
     [weather?.currentTime]
   );
 
@@ -77,6 +106,7 @@ export const LivingWeatherScene: React.FC<LivingWeatherSceneProps> = ({
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
+
     return startScene(canvas, {
       kind,
       night,
@@ -97,7 +127,10 @@ export const LivingWeatherScene: React.FC<LivingWeatherSceneProps> = ({
           : 'border-stone-200/80 bg-stone-50/60'
       } transition-colors duration-200 ${className}`}
     >
-      <canvas ref={canvasRef} className="w-full h-full block absolute inset-0 pointer-events-none" />
+      <canvas
+        ref={canvasRef}
+        className="w-full h-full block absolute inset-0 pointer-events-none"
+      />
 
       {/* Dev-only preview switcher (hidden in production builds) */}
       {import.meta.env.DEV && (
@@ -113,12 +146,14 @@ export const LivingWeatherScene: React.FC<LivingWeatherSceneProps> = ({
               {k}
             </button>
           ))}
+
           <button
             onClick={() => setDebug({ kind, night: !night })}
             className="px-2 py-0.5 text-[10px] rounded bg-black/60 text-white"
           >
             {night ? 'night' : 'day'}
           </button>
+
           <button
             onClick={() => setDebug(null)}
             className="px-2 py-0.5 text-[10px] rounded bg-black/60 text-white"
@@ -148,9 +183,11 @@ export const LivingWeatherScene: React.FC<LivingWeatherSceneProps> = ({
                   : 'text-[var(--accent-primary)]'
               }
             />
+
             <h2 className="text-xs font-semibold tracking-wider uppercase opacity-90">
               {locationName}
             </h2>
+
             <span
               className={`text-[11px] font-normal hidden sm:inline ${
                 isLightModeNight
@@ -175,7 +212,14 @@ export const LivingWeatherScene: React.FC<LivingWeatherSceneProps> = ({
                   : 'bg-white/70 border-stone-200 text-stone-700 hover:text-stone-900'
               }`}
             >
-              <RefreshCw size={12} className={isRefreshing ? 'animate-spin text-[var(--accent-primary)]' : ''} />
+              <RefreshCw
+                size={12}
+                className={
+                  isRefreshing
+                    ? 'animate-spin text-[var(--accent-primary)]'
+                    : ''
+                }
+              />
               <span className="hidden sm:inline">Sync</span>
             </button>
           )}
@@ -188,6 +232,7 @@ export const LivingWeatherScene: React.FC<LivingWeatherSceneProps> = ({
               <span className="text-7xl sm:text-8xl font-extralight tracking-tighter tabular-nums leading-none">
                 {weather?.currentTemp ?? '--'}°
               </span>
+
               <span
                 className={`text-xl sm:text-2xl font-light tracking-wide ${
                   isLightModeNight
@@ -197,7 +242,8 @@ export const LivingWeatherScene: React.FC<LivingWeatherSceneProps> = ({
                     : 'text-stone-700'
                 }`}
               >
-                {weather?.weatherCondition || getWeatherCondition(weather?.weatherCode ?? 0)}
+                {weather?.weatherCondition ||
+                  getWeatherCondition(weather?.weatherCode ?? 0)}
               </span>
             </div>
 
@@ -210,11 +256,13 @@ export const LivingWeatherScene: React.FC<LivingWeatherSceneProps> = ({
                   : 'text-stone-500'
               }`}
             >
-              Feels like {weather?.feelsLike ?? '--'}° &nbsp;·&nbsp; High {weather?.tempHigh ?? '--'}° &nbsp;·&nbsp; Low {weather?.tempLow ?? '--'}°
+              Feels like {weather?.feelsLike ?? '--'}° &nbsp;·&nbsp; High{' '}
+              {weather?.tempHigh ?? '--'}° &nbsp;·&nbsp; Low{' '}
+              {weather?.tempLow ?? '--'}°
             </p>
           </div>
 
-          {/* Wind & Precipitation Strip */}
+          {/* Wind & AQI Strip */}
           <div
             className={`p-3.5 rounded-xl border flex items-center gap-6 backdrop-blur-xs ${
               isLightModeNight
@@ -224,8 +272,13 @@ export const LivingWeatherScene: React.FC<LivingWeatherSceneProps> = ({
                 : 'bg-white/80 border-stone-200/90 text-stone-800'
             }`}
           >
+            {/* Wind */}
             <div className="flex items-center gap-2 text-xs sm:text-sm">
-              <Wind size={15} className="text-[var(--accent-primary)] shrink-0" />
+              <Wind
+                size={15}
+                className="text-[var(--accent-primary)] shrink-0"
+              />
+
               <span>
                 Wind:{' '}
                 <strong className="font-semibold">
@@ -234,8 +287,13 @@ export const LivingWeatherScene: React.FC<LivingWeatherSceneProps> = ({
               </span>
             </div>
 
+            {/* Precipitation */}
             <div className="flex items-center gap-2 text-xs sm:text-sm">
-              <Droplets size={15} className="text-[var(--accent-rain)] shrink-0" />
+              <Droplets
+                size={15}
+                className="text-[var(--accent-rain)] shrink-0"
+              />
+
               <span>
                 Precipitation:{' '}
                 <strong className="font-semibold">

@@ -174,7 +174,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
         </div>
 
         {/* Main Navigation */}
-        <div className="flex-1 overflow-y-auto px-3 py-2 space-y-6">
+        <div className="flex-1 overflow-y-auto scrollbar-thin px-3 py-2 space-y-6">
           {navGroups.map((group, idx) => (
             <div key={idx}>
               {(!isCollapsed || isMobileOpen) && (

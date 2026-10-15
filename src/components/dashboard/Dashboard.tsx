@@ -1,4 +1,6 @@
+
 import React, { useState, useEffect } from 'react';
+
 import {
   Sun,
   Cloud,
@@ -8,32 +10,68 @@ import {
   CloudSnow,
   CloudLightning,
   Droplets,
+  Droplet,
   Wind,
+  Leaf,
   Eye,
   Gauge,
   Sunset,
   Sunrise,
   RefreshCw,
 } from 'lucide-react';
+
 import { useGeolocation } from '../../hooks/useGeolocation';
+
 import {
   fetchLiveWeather,
   WeatherMetrics,
   getWeatherCondition,
 } from '../../services/openMeteo';
+
+import {
+  fetchAirQuality,
+  AirQualityData,
+} from '../../services/airQuality';
+
 import { useTemperatureUnit } from '../../context/TemperatureUnitContext';
 import { LivingWeatherScene } from '../weather/LivingWeatherScene';
 
 const getWeatherIcon = (code: number, size: number = 16) => {
-  if (code === 0) return <Sun size={size} className="text-accentSun" />;
-  if (code >= 1 && code <= 3) return <Cloud size={size} className="text-textSecondary" />;
-  if (code >= 45 && code <= 48) return <CloudFog size={size} className="text-textSecondary" />;
-  if (code >= 51 && code <= 55) return <CloudDrizzle size={size} className="text-accentRain" />;
-  if (code >= 61 && code <= 65) return <CloudRain size={size} className="text-accentRain" />;
-  if (code >= 71 && code <= 77) return <CloudSnow size={size} className="text-textSecondary" />;
-  if (code >= 80 && code <= 82) return <CloudRain size={size} className="text-accentRain" />;
-  if (code >= 95) return <CloudLightning size={size} className="text-accentAlert" />;
+  if (code === 0)
+    return <Sun size={size} className="text-accentSun" />;
+
+  if (code >= 1 && code <= 3)
+    return <Cloud size={size} className="text-textSecondary" />;
+
+  if (code >= 45 && code <= 48)
+    return <CloudFog size={size} className="text-textSecondary" />;
+
+  if (code >= 51 && code <= 55)
+    return <CloudDrizzle size={size} className="text-accentRain" />;
+
+  if (code >= 61 && code <= 65)
+    return <CloudRain size={size} className="text-accentRain" />;
+
+  if (code >= 71 && code <= 77)
+    return <CloudSnow size={size} className="text-textSecondary" />;
+
+  if (code >= 80 && code <= 82)
+    return <CloudRain size={size} className="text-accentRain" />;
+
+  if (code >= 95)
+    return <CloudLightning size={size} className="text-accentAlert" />;
+
   return <Cloud size={size} className="text-textSecondary" />;
+};
+
+// European AQI categories (Open-Meteo's european_aqi scale).
+const getAqiCategory = (aqi: number): string => {
+  if (aqi <= 20) return 'Good';
+  if (aqi <= 40) return 'Fair';
+  if (aqi <= 60) return 'Moderate';
+  if (aqi <= 80) return 'Poor';
+  if (aqi <= 100) return 'Very Poor';
+  return 'Extremely Poor';
 };
 
 export const Dashboard: React.FC = () => {
@@ -43,8 +81,15 @@ export const Dashboard: React.FC = () => {
   const { location, requestLocation } = useGeolocation();
   const { temperatureUnit } = useTemperatureUnit();
 
+  const [airQuality, setAirQuality] = useState<AirQualityData | null>(null);
+  const [loadingAirQuality, setLoadingAirQuality] = useState(false);
+
+  // Load weather data.
   useEffect(() => {
-    if (location.status === 'idle' || location.status === 'fetching') {
+    if (
+      location.status === 'idle' ||
+      location.status === 'fetching'
+    ) {
       setLoadingWeather(true);
       return;
     }
@@ -56,6 +101,7 @@ export const Dashboard: React.FC = () => {
 
     const loadData = async () => {
       setLoadingWeather(true);
+
       try {
         const metrics = await fetchLiveWeather(
           location.lat!,
@@ -63,6 +109,7 @@ export const Dashboard: React.FC = () => {
           location.cityName || 'Current Location',
           temperatureUnit
         );
+
         setWeather(metrics);
       } catch (err) {
         console.error('Failed to load dashboard metrics:', err);
@@ -72,16 +119,76 @@ export const Dashboard: React.FC = () => {
     };
 
     loadData();
-  }, [location.lat, location.lng, location.cityName, location.status, temperatureUnit]);
+  }, [
+    location.lat,
+    location.lng,
+    location.cityName,
+    location.status,
+    temperatureUnit,
+  ]);
+
+  // Load air quality data.
+  useEffect(() => {
+    if (
+      location.lat == null ||
+      location.lng == null ||
+      location.status !== 'acquired'
+    ) {
+      setAirQuality(null);
+      setLoadingAirQuality(false);
+      return;
+    }
+
+    let cancelled = false;
+
+    const loadAirQuality = async () => {
+      setLoadingAirQuality(true);
+
+      try {
+        const data = await fetchAirQuality(
+          location.lat!,
+          location.lng!
+        );
+
+        if (!cancelled) {
+          setAirQuality(data);
+        }
+      } catch (err) {
+        console.error('Failed to load air quality:', err);
+
+        if (!cancelled) {
+          setAirQuality(null);
+        }
+      } finally {
+        if (!cancelled) {
+          setLoadingAirQuality(false);
+        }
+      }
+    };
+
+    loadAirQuality();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [
+    location.lat,
+    location.lng,
+    location.status,
+  ]);
 
   return (
     <div className="w-full max-w-4xl mx-auto space-y-8 pb-12">
       {/* 1. HERO: Integrated Weather Scene */}
-      {location.status === 'denied' || location.status === 'error' ? (
+
+      {location.status === 'denied' ||
+      location.status === 'error' ? (
         <div className="p-8 rounded-2xl bg-bgSurface border border-borderSubtle text-center space-y-3">
           <p className="text-sm text-textSecondary">
-            Location access is unavailable. Grant permission to view local atmospheric conditions.
+            Location access is unavailable. Grant permission to
+            view local atmospheric conditions.
           </p>
+
           <button
             onClick={requestLocation}
             className="px-4 py-2 bg-accentPrimary hover:opacity-90 text-white text-xs font-medium rounded-xl transition-opacity"
@@ -91,7 +198,10 @@ export const Dashboard: React.FC = () => {
         </div>
       ) : loadingWeather && !weather ? (
         <div className="h-72 rounded-2xl bg-bgSurface border border-borderSubtle flex items-center justify-center text-textMuted text-sm">
-          <RefreshCw size={18} className="animate-spin text-accentPrimary mr-2" />
+          <RefreshCw
+            size={18}
+            className="animate-spin text-accentPrimary mr-2"
+          />
           Acquiring local meteorological observations...
         </div>
       ) : (
@@ -105,6 +215,7 @@ export const Dashboard: React.FC = () => {
       )}
 
       {/* 2. DETAILED ATMOSPHERIC METRICS */}
+
       {weather && (
         <section className="space-y-3">
           <h3 className="text-xs font-semibold tracking-wider text-textMuted uppercase">
@@ -112,9 +223,10 @@ export const Dashboard: React.FC = () => {
           </h3>
 
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+            {/* Humidity */}
             <div className="p-3.5 rounded-xl bg-bgSurface border border-borderSubtle space-y-1">
-              <div className="flex items-center gap-1.5 text-textMuted text-xs">
-                <Droplets size={13} className="text-accentPrimary" />
+              <div className="flex items-center gap-1.5 text-textMuted text-xs leading-none">
+                <Droplets size={13} className="text-accentPrimary shrink-0" />
                 <span>Humidity</span>
               </div>
               <div className="text-base font-semibold text-textPrimary tabular-nums">
@@ -122,29 +234,43 @@ export const Dashboard: React.FC = () => {
               </div>
             </div>
 
+            {/* AQI */}
             <div className="p-3.5 rounded-xl bg-bgSurface border border-borderSubtle space-y-1">
-              <div className="flex items-center gap-1.5 text-textMuted text-xs">
-                <Wind size={13} className="text-accentPrimary" />
-                <span>Wind</span>
+              <div className="flex items-center gap-1.5 text-textMuted text-xs leading-none">
+                <Leaf size={13} className="text-[var(--accent-rain)] shrink-0" />
+                <span>AQI</span>
               </div>
-              <div className="text-base font-semibold text-textPrimary tabular-nums">
-                {weather.windSpeed} km/h
+              <div className="flex items-baseline gap-2 text-base font-semibold leading-6 text-textPrimary tabular-nums">
+                {loadingAirQuality ? (
+                  'Loading...'
+                ) : airQuality?.aqi != null ? (
+                  <>
+                    {airQuality.aqi}
+                    <span className="text-sm font-medium leading-6 text-textMuted">
+                      {getAqiCategory(airQuality.aqi)}
+                    </span>
+                  </>
+                ) : (
+                  'N/A'
+                )}
               </div>
             </div>
 
+            {/* UV Index */}
             <div className="p-3.5 rounded-xl bg-bgSurface border border-borderSubtle space-y-1">
-              <div className="flex items-center gap-1.5 text-textMuted text-xs">
-                <Sun size={13} className="text-accentSun" />
+              <div className="flex items-center gap-1.5 text-textMuted text-xs leading-none">
+                <Sun size={13} className="text-accentSun shrink-0" />
                 <span>UV Index</span>
               </div>
               <div className="text-base font-semibold text-textPrimary tabular-nums">
-                0{weather.uvIndex}
+                {weather.uvIndex}
               </div>
             </div>
 
+            {/* Pressure */}
             <div className="p-3.5 rounded-xl bg-bgSurface border border-borderSubtle space-y-1">
-              <div className="flex items-center gap-1.5 text-textMuted text-xs">
-                <Gauge size={13} className="text-accentPrimary" />
+              <div className="flex items-center gap-1.5 text-textMuted text-xs leading-none">
+                <Gauge size={13} className="text-accentPrimary shrink-0" />
                 <span>Pressure</span>
               </div>
               <div className="text-base font-semibold text-textPrimary tabular-nums">
@@ -152,9 +278,10 @@ export const Dashboard: React.FC = () => {
               </div>
             </div>
 
+            {/* Visibility */}
             <div className="p-3.5 rounded-xl bg-bgSurface border border-borderSubtle space-y-1">
-              <div className="flex items-center gap-1.5 text-textMuted text-xs">
-                <Eye size={13} className="text-accentPrimary" />
+              <div className="flex items-center gap-1.5 text-textMuted text-xs leading-none">
+                <Eye size={13} className="text-accentPrimary shrink-0" />
                 <span>Visibility</span>
               </div>
               <div className="text-base font-semibold text-textPrimary tabular-nums">
@@ -162,9 +289,10 @@ export const Dashboard: React.FC = () => {
               </div>
             </div>
 
+            {/* Cloud Cover */}
             <div className="p-3.5 rounded-xl bg-bgSurface border border-borderSubtle space-y-1">
-              <div className="flex items-center gap-1.5 text-textMuted text-xs">
-                <Cloud size={13} className="text-accentPrimary" />
+              <div className="flex items-center gap-1.5 text-textMuted text-xs leading-none">
+                <Cloud size={13} className="text-accentPrimary shrink-0" />
                 <span>Cloud Cover</span>
               </div>
               <div className="text-base font-semibold text-textPrimary tabular-nums">
@@ -172,9 +300,10 @@ export const Dashboard: React.FC = () => {
               </div>
             </div>
 
+            {/* Sunrise */}
             <div className="p-3.5 rounded-xl bg-bgSurface border border-borderSubtle space-y-1">
-              <div className="flex items-center gap-1.5 text-textMuted text-xs">
-                <Sunrise size={13} className="text-accentSun" />
+              <div className="flex items-center gap-1.5 text-textMuted text-xs leading-none">
+                <Sunrise size={13} className="text-accentSun shrink-0" />
                 <span>Sunrise</span>
               </div>
               <div className="text-base font-semibold text-textPrimary tabular-nums">
@@ -182,9 +311,10 @@ export const Dashboard: React.FC = () => {
               </div>
             </div>
 
+            {/* Sunset */}
             <div className="p-3.5 rounded-xl bg-bgSurface border border-borderSubtle space-y-1">
-              <div className="flex items-center gap-1.5 text-textMuted text-xs">
-                <Sunset size={13} className="text-accentSun" />
+              <div className="flex items-center gap-1.5 text-textMuted text-xs leading-none">
+                <Sunset size={13} className="text-accentSun shrink-0" />
                 <span>Sunset</span>
               </div>
               <div className="text-base font-semibold text-textPrimary tabular-nums">
@@ -196,13 +326,13 @@ export const Dashboard: React.FC = () => {
       )}
 
       {/* 3. 24-HOUR FORECAST STRIP */}
+
       {weather?.hourly && (
         <section className="space-y-3">
           <div className="flex items-center justify-between">
             <h3 className="text-xs font-semibold tracking-wider text-textMuted uppercase">
               Next 24 Hours
             </h3>
-            <span className="text-[11px] text-textMuted">Horizontal forecast</span>
           </div>
 
           <div className="flex items-center gap-2.5 overflow-x-auto pb-2 pt-1 scrollbar-thin">
@@ -215,13 +345,32 @@ export const Dashboard: React.FC = () => {
                     : 'bg-bgSurface border-borderSubtle hover:border-borderDefault'
                 }`}
               >
-                <span className="text-[11px] text-textMuted tabular-nums">{h.time}</span>
-                <div className="my-2">{getWeatherIcon(h.code, 18)}</div>
-                <span className="text-xs font-medium text-textPrimary tabular-nums">{h.temp}°</span>
+                <span className="text-[11px] text-textMuted tabular-nums">
+                  {h.time}
+                </span>
+
+                <div className="my-2">
+                  {getWeatherIcon(h.code, 18)}
+                </div>
+
+                <span className="text-xs font-medium text-textPrimary tabular-nums">
+                  {h.temp}°
+                </span>
+
                 {h.precipProb > 0 ? (
-                  <span className="text-[10px] text-accentRain tabular-nums mt-0.5">{h.precipProb}%</span>
+                  <div className="flex items-center justify-center gap-0.5 mt-0.5">
+                    <Droplet
+                      size={10}
+                      className="text-slate-400/70 shrink-0"
+                    />
+                    <span className="text-[10px] text-slate-400/70 tabular-nums">
+                      {h.precipProb}%
+                    </span>
+                  </div>
                 ) : (
-                  <span className="text-[10px] text-transparent mt-0.5">-</span>
+                  <span className="text-[10px] text-transparent mt-0.5">
+                    -
+                  </span>
                 )}
               </div>
             ))}
@@ -230,22 +379,29 @@ export const Dashboard: React.FC = () => {
       )}
 
       {/* 4. 7-DAY OUTLOOK (GRID CARDS) */}
+
       {weather?.daily && (
         <section className="space-y-3">
           <div className="flex items-center justify-between">
             <h3 className="text-xs font-semibold tracking-wider text-textMuted uppercase">
               7-Day Outlook
             </h3>
-            <span className="text-[11px] text-textMuted">Weekly forecast</span>
+            <span className="text-[11px] text-textMuted">
+              Weekly forecast
+            </span>
           </div>
 
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-7 gap-3">
             {weather.daily.map((d, idx) => {
-              const weekMin = Math.min(...weather.daily.map((day) => day.tempMin));
-              const weekMax = Math.max(...weather.daily.map((day) => day.tempMax));
+              const weekMin = Math.min(
+                ...weather.daily!.map((day) => day.tempMin)
+              );
+              const weekMax = Math.max(
+                ...weather.daily!.map((day) => day.tempMax)
+              );
               const totalRange = Math.max(1, weekMax - weekMin);
-
-              const leftPercent = ((d.tempMin - weekMin) / totalRange) * 100;
+              const leftPercent =
+                ((d.tempMin - weekMin) / totalRange) * 100;
               const barWidthPercent = Math.max(
                 15,
                 ((d.tempMax - d.tempMin) / totalRange) * 100
@@ -254,7 +410,8 @@ export const Dashboard: React.FC = () => {
               const conditionText = getWeatherCondition(d.code);
               const isThunder = d.code >= 95;
               const isRain =
-                (d.code >= 50 && d.code <= 67) || (d.code >= 80 && d.code <= 82);
+                (d.code >= 50 && d.code <= 67) ||
+                (d.code >= 80 && d.code <= 82);
 
               return (
                 <div
@@ -264,7 +421,9 @@ export const Dashboard: React.FC = () => {
                   <div className="flex items-center justify-between">
                     <span
                       className={`text-xs font-semibold ${
-                        idx === 0 ? 'text-accentPrimary' : 'text-textPrimary'
+                        idx === 0
+                          ? 'text-accentPrimary'
+                          : 'text-textPrimary'
                       }`}
                     >
                       {d.date}
@@ -276,7 +435,9 @@ export const Dashboard: React.FC = () => {
                         {d.precipProb}%
                       </span>
                     ) : (
-                      <span className="text-[10px] text-textMuted">0%</span>
+                      <span className="text-[10px] text-textMuted">
+                        0%
+                      </span>
                     )}
                   </div>
 
@@ -300,8 +461,12 @@ export const Dashboard: React.FC = () => {
 
                   <div className="space-y-1 pt-1 border-t border-borderSubtle/60">
                     <div className="flex items-center justify-between text-xs tabular-nums">
-                      <span className="text-textMuted text-[11px]">{d.tempMin}°</span>
-                      <span className="font-semibold text-textPrimary">{d.tempMax}°</span>
+                      <span className="text-textMuted text-[11px]">
+                        {d.tempMin}°
+                      </span>
+                      <span className="font-semibold text-textPrimary">
+                        {d.tempMax}°
+                      </span>
                     </div>
 
                     <div className="relative h-1.5 w-full rounded-full bg-bgElevated overflow-hidden">

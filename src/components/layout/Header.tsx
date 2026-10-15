@@ -26,15 +26,29 @@ export const Header: React.FC<HeaderProps> = ({ onOpenMobileSidebar }) => {
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
-  // 24-Hour Real-Time Clock State
+  // 24-Hour Real-Time Clock State (Hours and Minutes Only)
   const [currentTime, setCurrentTime] = useState<string>(() =>
-    new Date().toLocaleTimeString('en-GB', { hour12: false })
+    new Date().toLocaleTimeString('en-GB', {
+      hour: '2-digit',
+      minute: '2-digit',
+      hour12: false,
+    })
   );
 
   useEffect(() => {
-    const timer = setInterval(() => {
-      setCurrentTime(new Date().toLocaleTimeString('en-GB', { hour12: false }));
-    }, 1000);
+    const updateTime = () => {
+      setCurrentTime(
+        new Date().toLocaleTimeString('en-GB', {
+          hour: '2-digit',
+          minute: '2-digit',
+          hour12: false,
+        })
+      );
+    };
+
+    updateTime();
+
+    const timer = setInterval(updateTime, 1000);
 
     return () => clearInterval(timer);
   }, []);
@@ -85,8 +99,6 @@ export const Header: React.FC<HeaderProps> = ({ onOpenMobileSidebar }) => {
 
       {/* Controls: Text Size, Theme Toggle & Profile */}
       <div className="flex items-center gap-2">
-        
-
         <button
           onClick={toggleTheme}
           className="w-9 h-9 rounded-full bg-bgElevated hover:opacity-85 text-textPrimary border border-borderSubtle flex items-center justify-center transition-all focus-visible:ring-1 focus-visible:ring-accentPrimary"

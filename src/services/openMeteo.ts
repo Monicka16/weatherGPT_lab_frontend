@@ -70,31 +70,54 @@ export async function fetchLiveWeather(
   const data = await response.json();
 
   const now = new Date();
-  const currentHourISO = now.toISOString().slice(0, 13);
-  let currentHourIndex = data.hourly?.time?.findIndex((t: string) => t.startsWith(currentHourISO));
-  if (currentHourIndex === -1 || currentHourIndex == null) {
-    currentHourIndex = now.getHours();
+  const currentTimeStr: string = data.current?.time ?? '';
+  const currentHourISO = currentTimeStr.slice(0, 13);
+
+  let currentHourIndex = data.hourly?.time?.findIndex(
+    (t: string) => t.slice(0, 13) === currentHourISO
+  );
+
+  // Find the first forecast hour at or after the current local hour
+  // if the exact timestamp doesn't match.
+  if (currentHourIndex === -1) {
+    currentHourIndex = (data.hourly?.time || []).findIndex(
+      (t: string) => t >= currentHourISO
+    );
+  }
+
+  // Safe fallback if no matching forecast hour is found.
+  if (currentHourIndex === -1) {
+    currentHourIndex = 0;
   }
 
   const hourlyForecast = (data.hourly?.time || [])
     .slice(currentHourIndex, currentHourIndex + 24)
     .map((timeStr: string, idx: number) => {
       const actualIdx = currentHourIndex + idx;
-      const date = new Date(timeStr);
+      // Open-Meteo's timezone=auto timestamps are local wall-clock times.
+      // Avoid parsing them with new Date(timeStr), which may interpret
+      // them in the browser's timezone.
+      const [, hourString] = timeStr.split('T');
+      const [hour, minute] = hourString.split(':').map(Number);
+      const displayTime = new Date(2000, 0, 1, hour, minute);
 
       return {
         time:
           idx === 0
             ? 'Now'
-            : date.toLocaleTimeString([], {
+            : displayTime.toLocaleTimeString([], {
                 hour: 'numeric',
                 hour12: true,
               }),
         rawTime: timeStr,
         temp: Math.round(data.hourly.temperature_2m?.[actualIdx] ?? 0),
         code: data.hourly.weather_code?.[actualIdx] ?? 0,
-        precipProb: Math.round(data.hourly.precipitation_probability?.[actualIdx] ?? 0),
-        precip: Number((data.hourly.precipitation?.[actualIdx] ?? 0).toFixed(1)),
+        precipProb: Math.round(
+          data.hourly.precipitation_probability?.[actualIdx] ?? 0
+        ),
+        precip: Number(
+          (data.hourly.precipitation?.[actualIdx] ?? 0).toFixed(1)
+        ),
       };
     });
 
